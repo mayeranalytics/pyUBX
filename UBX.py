@@ -13,7 +13,7 @@ if __name__ == '__main__':
     ser = serial.Serial('/dev/ttyAMA0', 9600, timeout=None)
     debug = os.environ.get("DEBUG") is not None
 
-    manager = UBXManager(ser)
+    manager = UBXManager(ser, debug=debug)
     manager.start()
     sys.stderr.write("started UBXManager\n")
 

@@ -28,10 +28,11 @@ class UBXManager(threading.Thread):
         UBX_CHKSUM_1 = 10
         UBX_CHKSUM_2 = 11
 
-    def __init__(self, ser):
+    def __init__(self, ser, debug=False):
         """Instantiate with serial."""
         threading.Thread.__init__(self)
         self.ser = ser
+        self.debug = debug
         self.ubx_chksum = UBXMessage.Checksum()
 
     def run(self):
@@ -50,12 +51,14 @@ class UBXManager(threading.Thread):
             self._fromUBX_CHKSUM_1,
             self._fromUBX_CHKSUM_2,
         ]
-        logfile = open("UBX.log", "wb")
+        if self.debug:
+            logfile = open("UBX.log", "wb")
         self._reset()
         while True:
             byte = self.ser.read(1)
-            logfile.write(byte)
-            logfile.flush()
+            if self.debug:
+                logfile.write(byte)
+                logfile.flush()
             self.state = transitionFrom[self.state.value](byte)
 
     def _reset(self):
