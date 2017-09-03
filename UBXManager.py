@@ -4,7 +4,6 @@
 import threading
 from enum import Enum
 import struct
-import UBX
 
 
 class UBXManager(threading.Thread):
@@ -179,10 +178,11 @@ class UBXManager(threading.Thread):
         print("NMEA ERR: {}".format(errMsg))
 
     def _onUBX(self, msgClass, msgId, buffer):
+        from UBXMessage import parseUBXMessage, format_byte_string
         try:
-            obj = UBX.parseUBXMessage(msgClass, msgId, buffer)
+            obj = parseUBXMessage(msgClass, msgId, buffer)
         except Exception as e:
-            errMsg = "{}, payload={}".format(e, UBX.format_byte_string(buffer))
+            errMsg = "{}, payload={}".format(e, format_byte_string(buffer))
             self.onUBXError(msgClass, msgId, errMsg)
         else:
             self.onUBX(obj)
