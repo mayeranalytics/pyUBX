@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """TODO."""
 
-import sys
-import os
-import serial
-import threading
-from enum import Enum
 import struct
-from time import sleep
+import inspect
+from enum import Enum
+import sys
+import UBX
 
 
 class MessageClass(Enum):
@@ -16,10 +14,7 @@ class MessageClass(Enum):
     NAV = b'\x01'  # Navigation Results Messages: Position, Speed, Time, Acceleration, Heading, DOP, SVs used
     RXM = b'\x02'  # Receiver Manager Messages: Satellite Status, RTC Status
     INF = b'\x04'  # Information Messages: Printf-Style Messages, with IDs such as Error, Warning, Notice
-    ACK = b'\x05'  # Ack/Nak Messages: Acknowledge or Reject messages to CFG input messages
-    CFG = b'\x06'  # Configuration Input Messages: Set Dynamic Model, Set DOP Mask, Set Baud Rate, etc.
     UPD = b'\x09'  # Firmware Update Messages: Memory/Flash erase/write, Reboot, Flash identification, etc.
-    MON = b'\x0A'  # Monitoring Messages: Communication Status, CPU Load, Stack Usage, Task Status
     AID = b'\x0B'  # AssistNow Aiding Messages: Ephemeris, Almanac, other A-GPS data input
     TIM = b'\x0D'  # Timing Messages: Time Pulse Output, Time Mark Results
     ESF = b'\x10'  # External Sensor Fusion Messages: External Sensor Measurements and Status Information
@@ -29,19 +24,32 @@ class MessageClass(Enum):
     HNR = b'\x28'  # High Rate Navigation Results Messages: High rate time, position, speed, heading
 
 
+def classFromMessageClass():
+    """Look up the python class corresponding to a UBX message class.
+
+    The result is something like
+    [(5, UBX.ACK.ACK), (6, UBX.CFG.CFG), (10, UBX.MON.MON)]
+    """
+    return dict([
+        (getattr(v, '_class'), v)
+        for (k, v) in inspect.getmembers(sys.modules["UBX"], inspect.isclass)
+        if v.__name__ != "UBXMessage"
+    ])
+
+
 class UBXMessage(object):
     """Base class for UBX messages."""
 
     def __init__(self, msgClass, msgId, payload):
         """Instantiate UBXMessage from MessageClass, messageId and payload bytestring."""
-        self.messageClass = msgClass
-        self.messageId = msgId
+        self.messageClass = bytes([msgClass])
+        self.messageId = bytes([msgId])
         self.payload = payload
 
     def serialize(self):
         """Serialize the UBXMessage."""
         msg = struct.pack('cc', b'\xb5', b'\x62')
-        msg += struct.pack('cc', self.messageClass.value, self.messageId)
+        msg += struct.pack('cc', self.messageClass, self.messageId)
         msg += struct.pack('<h', len(self.payload))
         msg += self.payload
         msg += struct.pack('>H', UBXMessage.Checksum(msg[2:]).get())
@@ -63,8 +71,7 @@ class UBXMessage(object):
 
         def reset(self):
             """Reset the checksums to zero."""
-            self.a = 0x00
-            self.b = 0x00
+            self.a, self.b = 0x00, 0x00
 
         def update(self, byte):
             """Update checksums with byte."""
@@ -75,8 +82,32 @@ class UBXMessage(object):
             self.b &= 0xff
 
         def get(self):
-            """Return the checksum (a 16-bit integer)."""
+            """Return the checksum (a 16-bit integer, ck_a is the MSB)."""
             return self.a * 256 + self.b
+
+
+def initMessageClass(cls):
+    """Decorator for the python class representing a UBX message class.
+
+    It adds a dict with name '_lookup' that maps UBX message ID to python
+    subclass.
+    """
+    subClasses = [c for c in cls.__dict__.values() if type(c) == type]
+    tab = dict([(getattr(subcls, '_id'), subcls) for subcls in subClasses])
+    setattr(cls, "_lookup", tab)
+    return cls
+
+
+def parseUBXMessage(msgClass, msgId, payload):
+    """Parse a UBX message from message class, message ID and payload."""
+    Cls = classFromMessageClass().get(msgClass)
+    if Cls is None:
+        raise Exception("Cannot parse message class {}".format(msgClass))
+    Subcls = Cls._lookup.get(msgId)
+    if Subcls is None:
+        raise Exception("Cannot parse message ID {} of message class {}"
+                        .format(msgId, msgClass.__name__))
+    return Subcls(payload)
 
 
 def format_byte_string(s):

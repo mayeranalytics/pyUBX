@@ -1,19 +1,26 @@
-from UBXMessage import UBXMessage, MessageClass
+"""Configuration Input Messages: Set Dynamic Model, Set DOP Mask, Set Baud Rate, etc."""
+
+from UBXMessage import UBXMessage, initMessageClass
 import struct
 
 
+@initMessageClass
 class CFG:
     """Message class CFG."""
 
+    _class = 0x06
+
     class PMS:
+
+        _id = 0x86
 
         class Req(UBXMessage):
             def __init__(self):
-                UBXMessage.__init__(self, MessageClass.CFG, b'\x86', b'')
+                UBXMessage.__init__(self, CFG._class, CFG.PMS._id, b'')
 
         class Res(UBXMessage):
             def __init__(self):
-                UBXMessage.__init__(self, MessageClass.CFG, b'\x86', b'')
+                UBXMessage.__init__(self, CFG._class, CFG.PMS._id, b'')
 
         class Set(UBXMessage):
             def __init__(self, powerSetupValue=1, period=0, onTime=0):
@@ -21,11 +28,13 @@ class CFG:
                     '<BBhhBB', 0, powerSetupValue, period, onTime, 0, 0
                 )
                 UBXMessage.__init__(
-                    self, MessageClass.CFG, b'\x86', payload
+                    self, CFG._class, CFG.PMS._id, payload
                 )
 
     class GNSS:
 
+        _id = 0x3E
+
         class Req(UBXMessage):
             def __init__(self):
-                UBXMessage.__init__(self, MessageClass.CFG, b'\x3E', b'')
+                UBXMessage.__init__(self, CFG._class, CFG.GNSS._id, b'')

@@ -4,6 +4,7 @@
 import threading
 from enum import Enum
 import struct
+import UBX
 
 
 class UBXManager(threading.Thread):

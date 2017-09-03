@@ -21,11 +21,11 @@ if __name__ == '__main__':
     reqPMS = UBX.CFG.PMS.Req().serialize()
     reqGNSS = UBX.CFG.GNSS.Req().serialize()
 
-    sleep(1)
+    sleep(2)
     sys.stderr.write("sending UBX.CFG.GNSS.Req\n")
     manager.send(reqGNSS)
 
-    sleep(1)
+    sleep(2)
     sys.stderr.write("sending UBX.CFG.PMS.Set\n")
     manager.send(reqPMS)
 
