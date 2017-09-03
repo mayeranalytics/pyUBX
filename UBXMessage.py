@@ -24,19 +24,6 @@ class MessageClass(Enum):
     HNR = b'\x28'  # High Rate Navigation Results Messages: High rate time, position, speed, heading
 
 
-def classFromMessageClass():
-    """Look up the python class corresponding to a UBX message class.
-
-    The result is something like
-    [(5, UBX.ACK.ACK), (6, UBX.CFG.CFG), (10, UBX.MON.MON)]
-    """
-    return dict([
-        (getattr(v, '_class'), v)
-        for (k, v) in inspect.getmembers(sys.modules["UBX"], inspect.isclass)
-        if v.__name__ != "UBXMessage"
-    ])
-
-
 class UBXMessage(object):
     """Base class for UBX messages."""
 
@@ -92,10 +79,61 @@ def initMessageClass(cls):
     It adds a dict with name '_lookup' that maps UBX message ID to python
     subclass.
     """
+    cls_name = cls.__name__
     subClasses = [c for c in cls.__dict__.values() if type(c) == type]
-    tab = dict([(getattr(subcls, '_id'), subcls) for subcls in subClasses])
-    setattr(cls, "_lookup", tab)
+    # 1. add lookup
+    lookup = dict([(getattr(subcls, '_id'), subcls) for subcls in subClasses])
+    setattr(cls, "_lookup", lookup)
+    # 2. add __init__ and __str__ in each subclass (if it doesn't exist)
+    for sc in subClasses:
+        if sc.__dict__.get('Fields') is None:
+            raise Exception(
+                "Class {}.{} has no Fields"
+                .format(cls.__name__, sc.__name__)
+            )
+        if sc.__dict__.get('__init__') is None:
+            def __init__(self, msg):
+                # The following is a list of (name, formatChar) tuples, such as
+                # [('clsID', 'B'), ('msgID', 'B')]
+                defStructPack = [
+                    (k, v.typ)
+                    for k, v in self.Fields.__dict__.items()
+                    if not k.startswith('__')
+                ]
+                packFmt = "".join([fmt for _, fmt in defStructPack])
+                values = struct.unpack(packFmt, msg)
+                for (i, (name, formatChar)) in enumerate(defStructPack):
+                    setattr(self, name, values[i])
+            setattr(sc, "__init__", __init__)
+        if sc.__dict__.get('__str__') is None:
+            def __str__(self):
+                # The following is a list of (name, formatChar) tuples, such as
+                # [('clsID', 'B'), ('msgID', 'B')]
+                defStructPack = [
+                    (k, v.typ)
+                    for k, v in self.Fields.__dict__.items()
+                    if not k.startswith('__')
+                ]
+                sc_name = type(self).__name__
+                s = "{}-{}".format(cls_name, sc_name)
+                for name, formatChar in defStructPack:
+                    s += "\n  {}={}".format(name, getattr(self, name))
+                return s
+            setattr(sc, "__str__", __str__)
     return cls
+
+
+def classFromMessageClass():
+    """Look up the python class corresponding to a UBX message class.
+
+    The result is something like
+    [(5, UBX.ACK.ACK), (6, UBX.CFG.CFG), (10, UBX.MON.MON)]
+    """
+    return dict([
+        (getattr(v, '_class'), v)
+        for (k, v) in inspect.getmembers(sys.modules["UBX"], inspect.isclass)
+        if v.__name__ not in ["UBXMessage", "U1"]
+    ])
 
 
 def parseUBXMessage(msgClass, msgId, payload):

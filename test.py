@@ -9,7 +9,9 @@ if __name__ == '__main__':
     setPMS = UBX.CFG.PMS.Set(powerSetupValue=2).serialize()
     print(setPMS)
 
-    getVER = UBX.MON.VER.Req().serialize()
+    getVER = UBX.MON.VER.Get().serialize()
     print(getVER)
 
     print(parseUBXMessage(0x05, 0x01, b'12'))
+
+    print(parseUBXMessage(0x05, 0x00, b'gh'))

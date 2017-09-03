@@ -14,6 +14,9 @@ class CFG:
 
         _id = 0x86
 
+        class Fields:
+            pass
+
         def __init__(self, payload):
             pass
 
@@ -33,6 +36,9 @@ class CFG:
     class GNSS:
 
         _id = 0x3E
+
+        class Fields:
+            pass
 
         def __init__(self, payload):
             pass

@@ -1,6 +1,7 @@
 """Ack/Nak Messages: Acknowledge or Reject messages to CFG input messages."""
 
 from UBXMessage import initMessageClass
+from Types import U1
 import struct
 
 
@@ -13,21 +14,15 @@ class ACK:
     class ACK:
 
         _id = 0x01
-        _len = 2
 
-        def __init__(self, msg):
-            self.clsID, self.msgID = struct.unpack('BB', msg)
-
-        def __str__(self):
-            return "ACK-ACK {:02X}:{:02X}".format(self.clsID, self.msgID)
+        class Fields:
+            clsID = U1()
+            msgID = U1()
 
     class NAK:
 
         _id = 0x00
-        _len = 2
 
-        def __init__(self, msg):
-            self.clsID, self.msgID = struct.unpack('BB', msg)
-
-        def __str__(self):
-            return "ACK-NAK {:02X}:{:02X}".format(self.clsID, self.msgID)
+        class Fields:
+            clsID = U1()
+            msgID = U1()

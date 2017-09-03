@@ -13,6 +13,9 @@ class MON:
 
         _id = 0x04
 
+        class Fields:
+            pass
+
         def __init__(self, payload):
             N = (len(payload) - 40)//30
             self.swVersion = stringFromByteString(payload[0:30])
