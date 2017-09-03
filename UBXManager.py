@@ -97,9 +97,9 @@ class UBXManager(threading.Thread):
         except ValueError:
             return UBXManager.STATE.START
         if self.chksum == self.chksum_calc:
-            self.onNMEA(self.buffer.decode('ascii'))
+            self._onNMEA(self.buffer.decode('ascii'))
         else:
-            self.onNMEAError(
+            self._onNMEAError(
                 "Incorrect Checksum: {:02X} should be {:02X}"
                 .format(self.chksum_calc, self.chksum)
             )
@@ -148,9 +148,9 @@ class UBXManager(threading.Thread):
 
     def _fromUBX_CHKSUM_2(self, byte):
         if self.chksum == self.ubx_chksum.get():
-            self.onUBX(self.ubx_class, self.ubx_id, self.buffer)
+            self._onUBX(self.ubx_class, self.ubx_id, self.buffer)
         else:
-            self.onUBXError(
+            self._onUBXError(
                 self.ubx_class,
                 self.ubx_id,
                 "Incorrect Checksum: {:04X} should be {:04X}"
@@ -164,22 +164,38 @@ class UBXManager(threading.Thread):
         else:
             return UBXManager.STATE.START
 
+    def _onNMEA(self, buffer):
+        self.onNMEA(buffer)
+
     def onNMEA(self, buffer):
-        """Handle an NMEA message."""
+        """Default handler for good NMEA message."""
         print("NMEA: {}".format(buffer))
 
+    def _onNMEAError(self, errMsg):
+        self.onNMEAError(errMsg)
+
     def onNMEAError(self, errMsg):
-        """Handle an NMEA error."""
+        """Default handler for faulty NMEA message."""
         print("NMEA ERR: {}".format(errMsg))
 
-    def onUBX(self, msgClass, msgId, buffer):
-        """Handle an UBX message."""
-        from UBXMessage import format_byte_string
-        print("UBX: {:02X}:{:02X} len={} payload={}".format(
-            msgClass, msgId, len(buffer), format_byte_string(buffer)))
+    def _onUBX(self, msgClass, msgId, buffer):
+        try:
+            obj = UBX.parseUBXMessage(msgClass, msgId, buffer)
+        except Exception, e:
+            errMsg = "{}, payload={}".format(e, format_byte_string(buffer))
+            self.onUBXError(msgClass, msgId, errMsg)
+        else:
+            self.onUBX(obj)
+
+    def onUBX(self, obj):
+        """Default handler for good UBX message."""
+        print(obj)
+
+    def _onUBXError(self, msgClass, msgId, errMsg):
+        """Handle an UBX error."""
 
     def onUBXError(self, msgClass, msgId, errMsg):
-        """Handle an UBX error."""
+        """Default handler for faulty or not yet defined UBX message."""
         from UBXMessage import format_byte_string
         m = struct.pack('cc', bytes([msgClass]), bytes([msgId]))
         m += struct.pack('<h', len(self.buffer))
