@@ -15,7 +15,7 @@ class MON:
         _id = 0x04
 
         def __init__(self, payload):
-            N = (len(payload) - 40)/30
+            N = (len(payload) - 40)//30
             self.swVersion = payload[0:30]
             self.hwVersion = payload[30:40]
             self.extension = [
