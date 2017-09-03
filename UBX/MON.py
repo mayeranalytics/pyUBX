@@ -23,12 +23,13 @@ class MON:
             ]
 
         def __str__(self):
-            s = "swVersion={}\nhwVersion={}".format(
+            s = "MON-VER:"
+            s += "  swVersion={}\n  hwVersion={}".format(
                 stringFromByteString(self.hwVersion),
                 stringFromByteString(self.swVersion)
             )
             for ext in self.extension:
-                s += "\n{}".format(stringFromByteString(ext))
+                s += "\n  {}".format(stringFromByteString(ext))
             return s
 
         class Get(UBXMessage):
