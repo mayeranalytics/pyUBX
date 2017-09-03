@@ -178,12 +178,12 @@ class UBXManager(threading.Thread):
         print("NMEA ERR: {}".format(errMsg))
 
     def _onUBX(self, msgClass, msgId, buffer):
-        from UBXMessage import parseUBXMessage, format_byte_string
+        from UBXMessage import parseUBXMessage, formatByteString
         try:
             obj = parseUBXMessage(msgClass, msgId, buffer)
         except Exception as e:
             errMsg = "No parse, \"{}\", payload={}".format(
-                     e, format_byte_string(buffer))
+                     e, formatByteString(buffer))
             self.onUBXError(msgClass, msgId, errMsg)
         else:
             self.onUBX(obj)
@@ -202,6 +202,6 @@ class UBXManager(threading.Thread):
 
     def send(self, msg):
         """Send message to ser."""
-        from UBXMessage import format_byte_string
-        print("SEND: {}".format(format_byte_string(msg)))
+        from UBXMessage import formatByteString
+        print("SEND: {}".format(formatByteString(msg)))
         self.ser.write(msg)

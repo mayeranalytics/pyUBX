@@ -110,6 +110,15 @@ def parseUBXMessage(msgClass, msgId, payload):
     return Subcls(payload)
 
 
-def format_byte_string(s):
+def formatByteString(s):
     """Return a readable string of hex numbers."""
     return " ".join('{:02x}'.format(x) for x in s)
+
+
+def stringFromByteString(bs):
+    """Extract a null-terminated string from bytestring."""
+    i = bs.find(0)
+    if i < 0:
+        return ""
+    else:
+        return bs[0:i].decode('ascii')
