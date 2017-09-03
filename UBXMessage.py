@@ -80,49 +80,6 @@ class UBXMessage(object):
             return self.a * 256 + self.b
 
 
-class UBX:
-    """Comprises all message classes."""
-
-    class MON:
-
-        class VER:
-
-            class Req(UBXMessage):
-                def __init__(self):
-                    UBXMessage.__init__(self, MessageClass.MON, b'\x04', b'')
-
-            class Res(UBXMessage):
-                def __init__(self):
-                    UBXMessage.__init__(self, MessageClass.MON, b'\x04', b'')
-
-    class CFG:
-
-        class PMS:
-
-            class Req(UBXMessage):
-                def __init__(self):
-                    UBXMessage.__init__(self, MessageClass.CFG, b'\x86', b'')
-
-            class Res(UBXMessage):
-                def __init__(self):
-                    UBXMessage.__init__(self, MessageClass.CFG, b'\x86', b'')
-
-            class Set(UBXMessage):
-                def __init__(self, powerSetupValue=1, period=0, onTime=0):
-                    payload = struct.pack(
-                        '<BBhhBB', 0, powerSetupValue, period, onTime, 0, 0
-                    )
-                    UBXMessage.__init__(
-                        self, MessageClass.CFG, b'\x86', payload
-                    )
-
-        class GNSS:
-
-            class Req(UBXMessage):
-                def __init__(self):
-                    UBXMessage.__init__(self, MessageClass.CFG, b'\x3E', b'')
-
-
 def format_byte_string(s):
     """Return a readable string of hex numbers."""
     return " ".join('{:02x}'.format(x) for x in s)
