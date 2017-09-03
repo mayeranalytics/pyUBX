@@ -133,7 +133,8 @@ def classFromMessageClass():
         for (k, v) in inspect.getmembers(sys.modules["UBX"], inspect.isclass)
         if v.__name__ not in [
             "UBXMessage", "U1", "I1", "X1", "U2", "I2", "X2",
-            "U4", "I4", "X4", "R4", "R8", "CH"]
+            "U4", "I4", "X4", "R4", "R8", "CH"
+            ]
     ])
 
 

@@ -2,6 +2,7 @@
 
 from UBXMessage import UBXMessage, initMessageClass
 import struct
+from Types import U1, U2
 
 
 @initMessageClass
@@ -15,10 +16,11 @@ class CFG:
         _id = 0x86
 
         class Fields:
-            pass
-
-        def __init__(self, payload):
-            pass
+            version = U1()
+            powerSetupValue = U1()
+            period = U2()
+            onTime = U2()
+            reserved = U2()
 
         class Get(UBXMessage):
             def __init__(self):
@@ -38,9 +40,6 @@ class CFG:
         _id = 0x3E
 
         class Fields:
-            pass
-
-        def __init__(self, payload):
             pass
 
         class Get(UBXMessage):
