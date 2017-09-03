@@ -114,8 +114,7 @@ def initMessageClass(cls):
                     for k, v in self.Fields.__dict__.items()
                     if not k.startswith('__')
                 ]
-                sc_name = type(self).__name__
-                s = "{}-{}".format(cls_name, sc_name)
+                s = "{}-{}".format(cls_name, type(self).__name__)
                 for name, formatChar in defStructPack:
                     s += "\n  {}={}".format(name, getattr(self, name))
                 return s
@@ -132,7 +131,9 @@ def classFromMessageClass():
     return dict([
         (getattr(v, '_class'), v)
         for (k, v) in inspect.getmembers(sys.modules["UBX"], inspect.isclass)
-        if v.__name__ not in ["UBXMessage", "U1"]
+        if v.__name__ not in [
+            "UBXMessage", "U1", "I1", "X1", "U2", "I2", "X2",
+            "U4", "I4", "X4", "R4", "R8", "CH"]
     ])
 
 

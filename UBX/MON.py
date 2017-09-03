@@ -1,6 +1,7 @@
 """Monitoring Messages: Communication Status, CPU Load, Stack Usage, Task Status. """
 
 from UBXMessage import UBXMessage, initMessageClass, stringFromByteString
+from Types import CH
 
 
 @initMessageClass
