@@ -1,4 +1,5 @@
-from UBXMessage import UBXMessage
+from UBXMessage import UBXMessage, MessageClass
+import struct
 
 
 class CFG:

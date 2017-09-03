@@ -1,1 +1,2 @@
-__all__ = [MON, VER]
+from UBX.CFG import *
+from UBX.MON import *

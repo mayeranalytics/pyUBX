@@ -1,14 +1,9 @@
 #!/usr/bin/env python3
 """TODO."""
 
-import sys
-import os
-import serial
 import threading
 from enum import Enum
 import struct
-from time import sleep
-from UBXMessage import UBXMessage, format_byte_string
 
 
 class UBXManager(threading.Thread):
@@ -30,6 +25,7 @@ class UBXManager(threading.Thread):
 
     def __init__(self, ser, debug=False):
         """Instantiate with serial."""
+        from UBXMessage import UBXMessage
         threading.Thread.__init__(self)
         self.ser = ser
         self.debug = debug
@@ -177,11 +173,13 @@ class UBXManager(threading.Thread):
 
     def onUBX(self, msgClass, msgId, buffer):
         """Handle an UBX message."""
+        from UBXMessage import format_byte_string
         print("UBX: {:02X}:{:02X} len={} payload={}".format(
             msgClass, msgId, len(buffer), format_byte_string(buffer)))
 
     def onUBXError(self, msgClass, msgId, errMsg):
         """Handle an UBX error."""
+        from UBXMessage import format_byte_string
         m = struct.pack('cc', bytes([msgClass]), bytes([msgId]))
         m += struct.pack('<h', len(self.buffer))
         m += self.buffer
@@ -190,5 +188,6 @@ class UBXManager(threading.Thread):
 
     def send(self, msg):
         """Send message to ser."""
+        from UBXMessage import format_byte_string
         print("SEND: {}".format(format_byte_string(msg)))
         self.ser.write(msg)
