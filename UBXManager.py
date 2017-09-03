@@ -181,8 +181,8 @@ class UBXManager(threading.Thread):
     def _onUBX(self, msgClass, msgId, buffer):
         try:
             obj = UBX.parseUBXMessage(msgClass, msgId, buffer)
-        except Exception, e:
-            errMsg = "{}, payload={}".format(e, format_byte_string(buffer))
+        except Exception as e:
+            errMsg = "{}, payload={}".format(e, UBX.format_byte_string(buffer))
             self.onUBXError(msgClass, msgId, errMsg)
         else:
             self.onUBX(obj)
