@@ -8,6 +8,7 @@ import threading
 from enum import Enum
 import struct
 from time import sleep
+from UBXMessage import UBXMessage, format_byte_string
 
 
 class UBXManager(threading.Thread):
@@ -188,33 +189,3 @@ class UBXManager(threading.Thread):
         """Send message to ser."""
         print("SEND: {}".format(format_byte_string(msg)))
         self.ser.write(msg)
-
-
-def format_byte_string(s):
-    """Return a readable string of hex numbers."""
-    return " ".join('{:02x}'.format(x) for x in s)
-
-
-if __name__ == '__main__':
-
-    # global variables!
-    ser = serial.Serial('/dev/ttyAMA0', 9600, timeout=None)
-    debug = os.environ.get("DEBUG") is not None
-
-    manager = UBXManager(ser)
-    manager.start()
-    sys.stderr.write("started UBXManager\n")
-
-    setPMS = UBX.CFG.PMS.Set(powerSetupValue=2).serialize()
-    reqPMS = UBX.CFG.PMS.Req().serialize()
-    reqGNSS = UBX.CFG.GNSS.Req().serialize()
-
-    sleep(1)
-    sys.stderr.write("sending UBX.CFG.GNSS.Req\n")
-    manager.send(reqGNSS)
-
-    sleep(1)
-    sys.stderr.write("sending UBX.CFG.PMS.Set\n")
-    manager.send(reqPMS)
-
-    manager.join()
