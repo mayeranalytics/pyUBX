@@ -1,6 +1,6 @@
 """Ack/Nak Messages: Acknowledge or Reject messages to CFG input messages."""
 
-from UBXMessage import UBXMessage, initMessageClass
+from UBXMessage import initMessageClass
 import struct
 
 
