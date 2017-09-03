@@ -6,7 +6,7 @@ import os
 import serial
 from time import sleep
 from UBXManager import UBXManager
-from UBXMessage import UBX
+import UBX
 
 if __name__ == '__main__':
 
