@@ -23,8 +23,8 @@ class MON:
             ]
 
         def __str__(self):
-            s = "swVersion={}\nhwVersion={}"
-                .format(self.hwVersion, self.swVersion)
+            s = "swVersion={}\nhwVersion={}".format(
+                self.hwVersion, self.swVersion)
             for ext in self.extension:
                 s += "\n{}".format(ext)
             return s

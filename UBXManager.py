@@ -182,8 +182,8 @@ class UBXManager(threading.Thread):
         try:
             obj = parseUBXMessage(msgClass, msgId, buffer)
         except Exception as e:
-            errMsg = "No parse, \"{}\", payload={}"
-                     .format(e, format_byte_string(buffer))
+            errMsg = "No parse, \"{}\", payload={}".format(
+                     e, format_byte_string(buffer))
             self.onUBXError(msgClass, msgId, errMsg)
         else:
             self.onUBX(obj)
