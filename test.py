@@ -8,3 +8,4 @@ import UBX
 if __name__ == '__main__':
 
     setPMS = UBX.CFG.PMS.Set(powerSetupValue=2).serialize()
+    print(setPMS)

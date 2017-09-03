@@ -45,7 +45,6 @@ class UBXMessage(object):
         msg += struct.pack('<h', len(self.payload))
         msg += self.payload
         msg += struct.pack('>H', UBXMessage.Checksum(msg[2:]).get())
-        sys.stderr.write("MSG: {}\n".format(msg))
         return msg
 
     class Checksum:
