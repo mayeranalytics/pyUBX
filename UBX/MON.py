@@ -27,7 +27,7 @@ class MON:
             s += "\n  swVersion=" + self.hwVersion
             s += "\n  hwVersion=" + self.swVersion
             for ext in self.extension:
-                s += "\n  " + stringFromByteString(ext)
+                s += "\n  " + ext
             return s
 
         class Get(UBXMessage):
