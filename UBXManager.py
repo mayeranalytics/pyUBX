@@ -196,12 +196,8 @@ class UBXManager(threading.Thread):
 
     def onUBXError(self, msgClass, msgId, errMsg):
         """Default handler for faulty or not yet defined UBX message."""
-        from UBXMessage import format_byte_string
-        m = struct.pack('cc', bytes([msgClass]), bytes([msgId]))
-        m += struct.pack('<h', len(self.buffer))
-        m += self.buffer
-        print("UBX ERR {:02X}/{:02X}: {} payload={}"
-              .format(msgClass, msgId, errMsg, format_byte_string(m)))
+        print("UBX ERR {:02X}:{:02X} {}"
+              .format(msgClass, msgId, errMsg))
 
     def send(self, msg):
         """Send message to ser."""
