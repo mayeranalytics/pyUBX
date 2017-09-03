@@ -1,6 +1,6 @@
 """Monitoring Messages: Communication Status, CPU Load, Stack Usage, Task Status. """
 
-from UBXMessage import UBXMessage, initMessageClass
+from UBXMessage import UBXMessage, initMessageClass, stringFromByteString
 import struct
 
 
@@ -24,9 +24,11 @@ class MON:
 
         def __str__(self):
             s = "swVersion={}\nhwVersion={}".format(
-                self.hwVersion, self.swVersion)
+                stringFromByteString(self.hwVersion),
+                stringFromByteString(self.swVersion)
+            )
             for ext in self.extension:
-                s += "\n{}".format(ext)
+                s += "\n{}".format(stringFromByteString(ext))
             return s
 
         class Get(UBXMessage):
