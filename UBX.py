@@ -17,16 +17,21 @@ if __name__ == '__main__':
     manager.start()
     sys.stderr.write("started UBXManager\n")
 
+    getVER = UBX.MON.VER.Get().serialize()
     setPMS = UBX.CFG.PMS.Set(powerSetupValue=2).serialize()
-    reqPMS = UBX.CFG.PMS.Req().serialize()
-    reqGNSS = UBX.CFG.GNSS.Req().serialize()
+    getPMS = UBX.CFG.PMS.Get().serialize()
+    getGNSS = UBX.CFG.GNSS.Get().serialize()
 
     sleep(2)
-    sys.stderr.write("sending UBX.CFG.GNSS.Req\n")
-    manager.send(reqGNSS)
+    sys.stderr.write("sending UBX.MON.VER.Get\n")
+    manager.send(getVER)
 
     sleep(2)
-    sys.stderr.write("sending UBX.CFG.PMS.Set\n")
-    manager.send(reqPMS)
+    sys.stderr.write("sending UBX.CFG.GNSS.Get\n")
+    manager.send(getGNSS)
+
+    sleep(2)
+    sys.stderr.write("sending UBX.CFG.PMS.Get\n")
+    manager.send(getPMS)
 
     manager.join()

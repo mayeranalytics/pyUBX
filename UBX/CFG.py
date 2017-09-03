@@ -14,11 +14,10 @@ class CFG:
 
         _id = 0x86
 
-        class Req(UBXMessage):
-            def __init__(self):
-                UBXMessage.__init__(self, CFG._class, CFG.PMS._id, b'')
+        def __init__(self, payload):
+            pass
 
-        class Res(UBXMessage):
+        class Get(UBXMessage):
             def __init__(self):
                 UBXMessage.__init__(self, CFG._class, CFG.PMS._id, b'')
 
@@ -35,6 +34,9 @@ class CFG:
 
         _id = 0x3E
 
-        class Req(UBXMessage):
+        def __init__(self, payload):
+            pass
+
+        class Get(UBXMessage):
             def __init__(self):
                 UBXMessage.__init__(self, CFG._class, CFG.GNSS._id, b'')
