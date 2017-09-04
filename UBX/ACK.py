@@ -2,7 +2,6 @@
 
 from UBXMessage import initMessageClass
 from Types import U1
-import struct
 
 
 @initMessageClass
@@ -16,13 +15,13 @@ class ACK:
         _id = 0x01
 
         class Fields:
-            clsID = U1()
-            msgID = U1()
+            clsID = U1(1)
+            msgID = U1(2)
 
     class NAK:
 
         _id = 0x00
 
         class Fields:
-            clsID = U1()
-            msgID = U1()
+            clsID = U1(1)
+            msgID = U1(2)

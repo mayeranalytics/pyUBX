@@ -73,6 +73,18 @@ class UBXMessage(object):
             return self.a * 256 + self.b
 
 
+def _mkFieldStructPack(Fields):
+    # The following is a list of (name, formatChar) tuples, such as
+    # [('clsID', 'B', 1), ('msgID', 'B', 2)]
+    l = [
+        (v.ord, k, v.typ)
+        for k, v in Fields.__dict__.items()
+        if not k.startswith('__')
+    ]
+    l.sort()
+    return [(k, t) for (o, k, t) in l]
+
+
 def initMessageClass(cls):
     """Decorator for the python class representing a UBX message class.
 
@@ -93,29 +105,17 @@ def initMessageClass(cls):
             )
         if sc.__dict__.get('__init__') is None:
             def __init__(self, msg):
-                # The following is a list of (name, formatChar) tuples, such as
-                # [('clsID', 'B'), ('msgID', 'B')]
-                defStructPack = [
-                    (k, v.typ)
-                    for k, v in self.Fields.__dict__.items()
-                    if not k.startswith('__')
-                ]
-                packFmt = "".join([fmt for _, fmt in defStructPack])
+                fieldStructPack = _mkFieldStructPack(self.Fields)
+                packFmt = "".join([fmt for _, fmt in fieldStructPack])
                 values = struct.unpack(packFmt, msg)
-                for (i, (name, formatChar)) in enumerate(defStructPack):
+                for (i, (name, formatChar)) in enumerate(fieldStructPack):
                     setattr(self, name, values[i])
             setattr(sc, "__init__", __init__)
         if sc.__dict__.get('__str__') is None:
             def __str__(self):
-                # The following is a list of (name, formatChar) tuples, such as
-                # [('clsID', 'B'), ('msgID', 'B')]
-                defStructPack = [
-                    (k, v.typ)
-                    for k, v in self.Fields.__dict__.items()
-                    if not k.startswith('__')
-                ]
+                fieldStructPack = _mkFieldStructPack(self.Fields)
                 s = "{}-{}".format(cls_name, type(self).__name__)
-                for name, formatChar in defStructPack:
+                for name, formatChar in fieldStructPack:
                     s += "\n  {}={}".format(name, getattr(self, name))
                 return s
             setattr(sc, "__str__", __str__)
@@ -158,7 +158,15 @@ def formatByteString(s):
 def stringFromByteString(bs):
     """Extract a null-terminated string from bytestring."""
     i = bs.find(0)
-    if i < 0:
-        return ""
-    else:
-        return bs[0:i].decode('ascii')
+    return "" if i < 0 else bs[0:i].decode('ascii')
+
+
+def addGet(cls):
+    """Add a Get function to the subclass."""
+    class Get(UBXMessage):
+        def __init__(self):
+            # this only works because class and module have the same name!
+            _class = eval(cls.__module__)._class
+            UBXMessage.__init__(self, _class, cls._id, b'')
+    setattr(cls, "Get", Get)
+    return cls

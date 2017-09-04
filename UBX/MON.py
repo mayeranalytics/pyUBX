@@ -1,6 +1,6 @@
 """Monitoring Messages: Communication Status, CPU Load, Stack Usage, Task Status. """
 
-from UBXMessage import UBXMessage, initMessageClass, stringFromByteString
+from UBXMessage import UBXMessage, initMessageClass, stringFromByteString, addGet
 from Types import CH
 
 
@@ -10,12 +10,16 @@ class MON:
 
     _class = 0x0A
 
+    @addGet
     class VER:
 
         _id = 0x04
 
         class Fields:
-            pass
+            swVersion = CH(1, 30)
+            hwVersion = CH(2, 10)
+            class Repeated:
+                extension = CH(1, 10)
 
         def __init__(self, payload):
             N = (len(payload) - 40)//30
@@ -33,7 +37,3 @@ class MON:
             for ext in self.extension:
                 s += "\n  " + ext
             return s
-
-        class Get(UBXMessage):
-            def __init__(self):
-                UBXMessage.__init__(self, MON._class, MON.VER._id, b'')
