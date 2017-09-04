@@ -5,6 +5,7 @@ import struct
 import inspect
 from enum import Enum
 import sys
+from itertools import accumulate
 import UBX
 
 
@@ -73,46 +74,51 @@ class UBXMessage(object):
             return self.a * 256 + self.b
 
 
-def _mkFieldStructPack(Fields):
+def _mkFieldInfo(Fields):
     # The following is a list of (name, formatChar) tuples, such as
-    # [(1, 'clsID', 'B'), (2, 'msgID', 'B')]
+    # [(1, 'clsID', U1), (2, 'msgID', U1)]
     once = [
-        (v.ord, k, v.fmt)
+        (v.ord, k, v)
         for k, v in Fields.__dict__.items()
         if not k.startswith('__') and k != 'Repeated'
     ]
     once.sort()
     repeated = Fields.__dict__.get('Repeated')
-    repeated = [] if repeated is None else _mkFieldStructPack(repeated)
+    repeated = [] if repeated is None else _mkFieldInfo(repeated)
     return {
-        'once': ("".join([v for (o, k, v) in once]),    # struct pack string
-                 [k for (o, k, v) in once]),            # list of var names
+        'once': ([v for (o, k, v) in once],    # list of types
+                 [k for (o, k, v) in once]),   # list of var names
         'repeat': repeated
         }
 
 
-def _nameAndFmt(fieldStructPack, length):
-    packFmt, varNames = fieldStructPack['once']
-    repeat = fieldStructPack['repeat']
+def _mkNamesAndTypes(fieldInfo, msgLength):
+    """Make list of variable names and list of variable types.
+
+    Input is the fieldInfo as returned by _mkFieldInfo.
+    The number of repeated objects is deduced from the message length and
+    the types of variables in the 'once' and 'repeat' block of the input."""
+    varTypes, varNames = fieldInfo['once']
+    repeat = fieldInfo['repeat']
     if repeat:
-        packFmtRepeat, varNamesRepeat = repeat['once']
-        nOnce = struct.Struct(packFmt).size
-        nRepeat = struct.Struct(packFmtRepeat).size
-        N = (length - nOnce) // nRepeat
-        if nOnce + N * nRepeat != length:
+        varTypesRepeat, varNamesRepeat = repeat['once']     # nest level 1 only
+        sizeOnce = sum([t._size for t in varTypes])
+        sizeRepeat = sum([t._size for t in varTypesRepeat])
+        N = (msgLength - sizeOnce) // sizeRepeat
+        sizeTotal = sizeOnce + N * sizeRepeat
+        if sizeTotal != msgLength:
             errmsg = "message length {} does not match {}"\
-                     .format(length, nOnce + N * nRepeat)
+                     .format(msgLength, sizeTotal)
             raise Exception(errmsg)
-        packFmt = packFmt + N * packFmtRepeat
-        varNamesRepeat = _flatten(list(
+        varTypes += N * varTypesRepeat
+        varNames += _flatten(list(
             map(lambda i: list(map(lambda s: s+"_"+str(i),
                                    varNamesRepeat)
                               ),
                 range(1, N+1))
             )
         )
-        varNames = varNames + varNamesRepeat
-    return varNames, packFmt
+    return varNames, varTypes
 
 
 def _flatten(l):
@@ -122,8 +128,13 @@ def _flatten(l):
 def initMessageClass(cls):
     """Decorator for the python class representing a UBX message class.
 
-    It adds a dict with name '_lookup' that maps UBX message ID to python
-    subclass.
+    It does the following in cls:
+    - add a dict with name _lookup that maps UBX message ID to python subclass.
+    In each subclass it does this:
+    - add an __init__ if it doesn't exist
+    - add a __str__ if it doesn't exist
+    Function __init__ instantiates the object from a message.
+    Function __str__ creates a human readable string from the object.
     """
     cls_name = cls.__name__
     subClasses = [c for c in cls.__dict__.values() if type(c) == type]
@@ -140,34 +151,36 @@ def initMessageClass(cls):
         # add __init__ to subclass if necessary
         if sc.__dict__.get('__init__') is None:
             def __init__(self, msg):
-                fieldStructPack = _mkFieldStructPack(self.Fields)
-                varNames, packFmt = _nameAndFmt(fieldStructPack, len(msg))
+                fieldInfo = _mkFieldInfo(self.Fields)
+                varNames, varTypes = _mkNamesAndTypes(fieldInfo, len(msg))
                 if not varNames:
                     errmsg = 'No variables found in UBX.{}.{}.'\
                              .format(cls_name, sc.__name__)
                     errmsg += ' Is the \'Fields\' class empty?'
                     raise Exception(errmsg)
-                try:
-                    values = struct.unpack(packFmt, msg)
-                except Exception as e:
-                    errmsg = "{}, message length is {}".format(e, len(msg))
-                    raise Exception(errmsg) from None
-                if len(values) != len(varNames):
-                    errmsg = "Mismatch: {} values, but {} variables!"\
-                             .format(len(values), len(varNames))
-                    raise Exception(errmsg)
-                for (i, name) in enumerate(varNames):
-                    setattr(self, name, values[i])
-                setattr(self, '_len', len(msg))
+                _len = len(msg)     # msg will be consumed in the loop
+                for (varName, varType) in zip(varNames, varTypes):
+                    val, msg = varType.parse(msg)
+                    setattr(self, varName, val)
+                if len(msg) != 0:
+                    clsName = "UBX.{}.{}".format(cls_name, sc.__name__)
+                    raise Exception(
+                        "Message not fully consumed while parsing a {}!"
+                        .format(clsName)
+                    )
+                self._len = _len
             setattr(sc, "__init__", __init__)
         # add __str__ to subclass if necessary
         if sc.__dict__.get('__str__') is None:
             def __str__(self):
-                fieldStructPack = _mkFieldStructPack(self.Fields)
-                varNames, packFmt = _nameAndFmt(fieldStructPack, self._len)
+                fieldInfo = _mkFieldInfo(self.Fields)
+                varNames, varTypes = _mkNamesAndTypes(fieldInfo, self._len)
                 s = "{}-{}".format(cls_name, type(self).__name__)
-                for name in varNames:
-                    s += "\n  {}=0x{:02x}".format(name, getattr(self, name))
+                for (varName, varType) in zip(varNames, varTypes):
+                    s += "\n  {}={}".format(
+                        varName,
+                        varType.toString(getattr(self, varName))    # prettify
+                        )
                 return s
             setattr(sc, "__str__", __str__)
     return cls
@@ -206,14 +219,8 @@ def formatByteString(s):
     return " ".join('{:02x}'.format(x) for x in s)
 
 
-def stringFromByteString(bs):
-    """Extract a null-terminated string from bytestring."""
-    i = bs.find(0)
-    return "" if i < 0 else bs[0:i].decode('ascii')
-
-
 def addGet(cls):
-    """Add a Get function to the subclass."""
+    """Decorator that adds a Get function to the subclass."""
     class Get(UBXMessage):
         def __init__(self):
             # this only works because class and module have the same name!

@@ -1,6 +1,6 @@
 """Monitoring Messages: Communication Status, CPU Load, Stack Usage, Task Status. """
 
-from UBXMessage import UBXMessage, initMessageClass, stringFromByteString, addGet
+from UBXMessage import initMessageClass, addGet
 from Types import CH
 
 
@@ -16,7 +16,7 @@ class MON:
         _id = 0x04
 
         class Fields:
-            swVersion = CH(1, 30)
-            hwVersion = CH(2, 10)
+            swVersion = CH(1, 30, nullTerminatedString=True)
+            hwVersion = CH(2, 10, nullTerminatedString=True)
             class Repeated:
-                extension = CH(1, 10)
+                extension = CH(1, 10, nullTerminatedString=True)
