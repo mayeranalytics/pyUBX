@@ -77,7 +77,7 @@ def _mkFieldStructPack(Fields):
     # The following is a list of (name, formatChar) tuples, such as
     # [(1, 'clsID', 'B'), (2, 'msgID', 'B')]
     once = [
-        (v.ord, k, v.typ)
+        (v.ord, k, v.fmt)
         for k, v in Fields.__dict__.items()
         if not k.startswith('__') and k != 'Repeated'
     ]
@@ -105,10 +105,10 @@ def _nameAndFmt(fieldStructPack, length):
             raise Exception(errmsg)
         packFmt = packFmt + N * packFmtRepeat
         varNamesRepeat = _flatten(list(
-            map(lambda i: list(map(lambda s: s+str(i),
+            map(lambda i: list(map(lambda s: s+"_"+str(i),
                                    varNamesRepeat)
                               ),
-                range(1, nRepeat+1))
+                range(1, N+1))
             )
         )
         varNames = varNames + varNamesRepeat
@@ -127,36 +127,47 @@ def initMessageClass(cls):
     """
     cls_name = cls.__name__
     subClasses = [c for c in cls.__dict__.values() if type(c) == type]
-    # 1. add lookup
+
     lookup = dict([(getattr(subcls, '_id'), subcls) for subcls in subClasses])
     setattr(cls, "_lookup", lookup)
-    # 2. add __init__ and __str__ in each subclass (if it doesn't exist)
+
     for sc in subClasses:
-        if sc.__dict__.get('Fields') is None:
+        if sc.__dict__.get('Fields') is None:       # 'Fields' must be present
             raise Exception(
                 "Class {}.{} has no Fields"
                 .format(cls.__name__, sc.__name__)
             )
+        # add __init__ to subclass if necessary
         if sc.__dict__.get('__init__') is None:
             def __init__(self, msg):
                 fieldStructPack = _mkFieldStructPack(self.Fields)
                 varNames, packFmt = _nameAndFmt(fieldStructPack, len(msg))
+                if not varNames:
+                    errmsg = 'No variables found in UBX.{}.{}.'\
+                             .format(cls_name, sc.__name__)
+                    errmsg += ' Is the \'Fields\' class empty?'
+                    raise Exception(errmsg)
                 try:
                     values = struct.unpack(packFmt, msg)
                 except Exception as e:
                     errmsg = "{}, message length is {}".format(e, len(msg))
                     raise Exception(errmsg) from None
+                if len(values) != len(varNames):
+                    errmsg = "Mismatch: {} values, but {} variables!"\
+                             .format(len(values), len(varNames))
+                    raise Exception(errmsg)
                 for (i, name) in enumerate(varNames):
                     setattr(self, name, values[i])
                 setattr(self, '_len', len(msg))
             setattr(sc, "__init__", __init__)
+        # add __str__ to subclass if necessary
         if sc.__dict__.get('__str__') is None:
             def __str__(self):
                 fieldStructPack = _mkFieldStructPack(self.Fields)
                 varNames, packFmt = _nameAndFmt(fieldStructPack, self._len)
                 s = "{}-{}".format(cls_name, type(self).__name__)
                 for name in varNames:
-                    s += "\n  {}={}".format(name, getattr(self, name))
+                    s += "\n  {}=0x{:02x}".format(name, getattr(self, name))
                 return s
             setattr(sc, "__str__", __str__)
     return cls

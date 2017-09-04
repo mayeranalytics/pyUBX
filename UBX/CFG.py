@@ -2,7 +2,7 @@
 
 from UBXMessage import UBXMessage, initMessageClass, addGet
 import struct
-from Types import U1, U2
+from Types import U1, U2, X4
 
 
 @initMessageClass
@@ -38,4 +38,13 @@ class CFG:
         _id = 0x3E
 
         class Fields:
-            pass
+            msgVer = U1(1)
+            numTrkChHw = U1(2)
+            numTrkChUse = U1(3)
+            numConfigBlocks = U1(4)
+            class Repeated:
+                gnssId = U1(1)
+                resTrkCh = U1(2)
+                maxTrkCh = U1(3)
+                reserved = U1(4)
+                flags = X4(5)
