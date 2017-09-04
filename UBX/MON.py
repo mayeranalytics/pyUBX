@@ -20,20 +20,3 @@ class MON:
             hwVersion = CH(2, 10)
             class Repeated:
                 extension = CH(1, 10)
-
-        def __init__(self, payload):
-            N = (len(payload) - 40)//30
-            self.swVersion = stringFromByteString(payload[0:30])
-            self.hwVersion = stringFromByteString(payload[30:40])
-            self.extension = [
-                stringFromByteString(payload[(40+30*i):(40+30*i+30)])
-                for i in range(N)
-            ]
-
-        def __str__(self):
-            s = "MON-VER:"
-            s += "\n  swVersion=" + self.hwVersion
-            s += "\n  hwVersion=" + self.swVersion
-            for ext in self.extension:
-                s += "\n  " + ext
-            return s

@@ -28,7 +28,7 @@ class UBXMessage(object):
     """Base class for UBX messages."""
 
     def __init__(self, msgClass, msgId, payload):
-        """Instantiate UBXMessage from MessageClass, messageId and payload bytestring."""
+        """Instantiate UBXMessage from MessageClass, messageId and payload."""
         self.messageClass = bytes([msgClass])
         self.messageId = bytes([msgId])
         self.payload = payload
@@ -75,14 +75,48 @@ class UBXMessage(object):
 
 def _mkFieldStructPack(Fields):
     # The following is a list of (name, formatChar) tuples, such as
-    # [('clsID', 'B', 1), ('msgID', 'B', 2)]
-    l = [
+    # [(1, 'clsID', 'B'), (2, 'msgID', 'B')]
+    once = [
         (v.ord, k, v.typ)
         for k, v in Fields.__dict__.items()
-        if not k.startswith('__')
+        if not k.startswith('__') and k != 'Repeated'
     ]
-    l.sort()
-    return [(k, t) for (o, k, t) in l]
+    once.sort()
+    repeated = Fields.__dict__.get('Repeated')
+    repeated = [] if repeated is None else _mkFieldStructPack(repeated)
+    return {
+        'once': ("".join([v for (o, k, v) in once]),    # struct pack string
+                 [k for (o, k, v) in once]),            # list of var names
+        'repeat': repeated
+        }
+
+
+def _nameAndFmt(fieldStructPack, length):
+    packFmt, varNames = fieldStructPack['once']
+    repeat = fieldStructPack['repeat']
+    if repeat:
+        packFmtRepeat, varNamesRepeat = repeat['once']
+        nOnce = struct.Struct(packFmt).size
+        nRepeat = struct.Struct(packFmtRepeat).size
+        N = (length - nOnce) // nRepeat
+        if nOnce + N * nRepeat != length:
+            errmsg = "message length {} does not match {}"\
+                     .format(length, nOnce + N * nRepeat)
+            raise Exception(errmsg)
+        packFmt = packFmt + N * packFmtRepeat
+        varNamesRepeat = _flatten(list(
+            map(lambda i: list(map(lambda s: s+str(i),
+                                   varNamesRepeat)
+                              ),
+                range(1, nRepeat+1))
+            )
+        )
+        varNames = varNames + varNamesRepeat
+    return varNames, packFmt
+
+
+def _flatten(l):
+    return [item for sublist in l for item in sublist]
 
 
 def initMessageClass(cls):
@@ -106,16 +140,22 @@ def initMessageClass(cls):
         if sc.__dict__.get('__init__') is None:
             def __init__(self, msg):
                 fieldStructPack = _mkFieldStructPack(self.Fields)
-                packFmt = "".join([fmt for _, fmt in fieldStructPack])
-                values = struct.unpack(packFmt, msg)
-                for (i, (name, formatChar)) in enumerate(fieldStructPack):
+                varNames, packFmt = _nameAndFmt(fieldStructPack, len(msg))
+                try:
+                    values = struct.unpack(packFmt, msg)
+                except Exception as e:
+                    errmsg = "{}, message length is {}".format(e, len(msg))
+                    raise Exception(errmsg) from None
+                for (i, name) in enumerate(varNames):
                     setattr(self, name, values[i])
+                setattr(self, '_len', len(msg))
             setattr(sc, "__init__", __init__)
         if sc.__dict__.get('__str__') is None:
             def __str__(self):
                 fieldStructPack = _mkFieldStructPack(self.Fields)
+                varNames, packFmt = _nameAndFmt(fieldStructPack, self._len)
                 s = "{}-{}".format(cls_name, type(self).__name__)
-                for name, formatChar in fieldStructPack:
+                for name in varNames:
                     s += "\n  {}={}".format(name, getattr(self, name))
                 return s
             setattr(sc, "__str__", __str__)
