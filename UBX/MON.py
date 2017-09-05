@@ -19,4 +19,4 @@ class MON:
             swVersion = CH(1, 30, nullTerminatedString=True)
             hwVersion = CH(2, 10, nullTerminatedString=True)
             class Repeated:
-                extension = CH(1, 10, nullTerminatedString=True)
+                extension = CH(1, 30, nullTerminatedString=True)
