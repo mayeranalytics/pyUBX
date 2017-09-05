@@ -11,7 +11,7 @@ from struct import Struct, unpack
 # function classFromMessageClass !!
 
 
-def _InitType(cls):
+def _InitGenericType(cls):
     """Add the standard __init__ to the class."""
     # 1. add __init__ function to cls
     if cls.__dict__.get('__init__') is None:
@@ -47,70 +47,70 @@ def stringFromByteString(bs):
     i = bs.find(0)
     return "" if i < 0 else bs[0:i].decode('ascii')
 
-@_InitType
+@_InitGenericType
 class U1:
     """UBX Unsigned Char."""
-    fmt   = "B"
+    fmt = "B"
     def ctype(): return "uint8_t"
 
-@_InitType
+@_InitGenericType
 class I1:
     """UBX Signed Char."""
-    fmt   = "b"
+    fmt = "b"
     def ctype(): return "int8_t"
 
-@_InitType
+@_InitGenericType
 class X1:
     """UBX 1-byte bitfield."""
-    fmt   = "B"
+    fmt = "B"
     def ctype(): return "uint8_t"
 
-@_InitType
+@_InitGenericType
 class U2:
     """UBX Unsigned Short."""
-    fmt   = "H"
+    fmt = "H"
     def ctype(): return "uint16_t"
 
-@_InitType
+@_InitGenericType
 class I2:
     """UBX Signed Short."""
-    fmt   = "h"
+    fmt = "h"
     def ctype(): return "int16_t"
 
-@_InitType
+@_InitGenericType
 class X2:
     """UBX 2-byte bitfield."""
-    fmt   = "H"
+    fmt = "H"
     def ctype(): return "uint16_t"
 
-@_InitType
+@_InitGenericType
 class U4:
     """UBX Unsigned Int."""
-    fmt   = "I"
+    fmt = "I"
     def ctype(): return "uint32_t"
 
-@_InitType
+@_InitGenericType
 class I4:
     """UBX Signed Int."""
-    fmt   = "i"
+    fmt = "i"
     def ctype(): return "int32_t"
 
-@_InitType
+@_InitGenericType
 class X4:
     """UBX 4-byte bitfield."""
-    fmt   = "I"
+    fmt = "I"
     def ctype(): return "uint32_t"
 
-@_InitType
+@_InitGenericType
 class R4:
     """UBX single precision float."""
-    fmt   = "f"
+    fmt = "f"
     def ctype(): return "float"
 
-@_InitType
+@_InitGenericType
 class R8:
     """UBX double precision float."""
-    fmt   = "d"
+    fmt = "d"
     def ctype(): return "double"
 
 class CH:
