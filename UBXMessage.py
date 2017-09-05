@@ -32,14 +32,14 @@ class UBXMessage(object):
         """Instantiate UBXMessage from MessageClass, messageId and payload."""
         self.messageClass = bytes([msgClass])
         self.messageId = bytes([msgId])
-        self.payload = payload
+        self._payload = payload
 
     def serialize(self):
         """Serialize the UBXMessage."""
         msg = struct.pack('cc', b'\xb5', b'\x62')
         msg += struct.pack('cc', self.messageClass, self.messageId)
-        msg += struct.pack('<h', len(self.payload))
-        msg += self.payload
+        msg += struct.pack('<h', len(self._payload))
+        msg += self._payload
         msg += struct.pack('>H', UBXMessage.Checksum(msg[2:]).get())
         return msg
 
@@ -169,13 +169,14 @@ def initMessageClass(cls):
                         .format(clsName)
                     )
                 self._len = _len
+                self._payload = msg
             setattr(sc, "__init__", __init__)
         # add __str__ to subclass if necessary
         if sc.__dict__.get('__str__') is None:
             def __str__(self):
                 fieldInfo = _mkFieldInfo(self.Fields)
                 varNames, varTypes = _mkNamesAndTypes(fieldInfo, self._len)
-                s = "{}-{}".format(cls_name, type(self).__name__)
+                s = "{}-{}:".format(cls_name, type(self).__name__)
                 for (varName, varType) in zip(varNames, varTypes):
                     s += "\n  {}={}".format(
                         varName,
