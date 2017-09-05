@@ -3,7 +3,7 @@
 
 import threading
 from enum import Enum
-import struct
+import sys
 
 
 class UBXManager(threading.Thread):
@@ -49,6 +49,7 @@ class UBXManager(threading.Thread):
         ]
         if self.debug:
             logfile = open("UBX.log", "wb")
+            sys.stderr.write("Writing log to UBX.log\n")
         self._reset()
         while True:
             byte = self.ser.read(1)
@@ -203,5 +204,6 @@ class UBXManager(threading.Thread):
     def send(self, msg):
         """Send message to ser."""
         from UBXMessage import formatByteString
-        print("SEND: {}".format(formatByteString(msg)))
+        if self.debug:
+            print("SEND: {}".format(formatByteString(msg)))
         self.ser.write(msg)
