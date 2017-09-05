@@ -136,18 +136,19 @@ class CH:
         return '"{}"'.format(val)
 
 class U:
-    """UBX Unsigned Char."""
+    """Variable-length array of unsigned chars."""
     fmt = None  # Not needed
     def ctype(): return "uint8_t[{}]".format(self.N)
     def __init__(self, _ord, N):
         self._ord = _ord
         self.N = N
     def parse(self, msg):
-        if len(msg) != self.N:
-            err = "Message length {} is not equal to the required length {}"\
+        if len(msg) < self.N:
+            err = "Message length {} is shorter than required {}"\
                   .format(len(msg), self._size)
             raise Exception(err)
-        self.data = msg
+        val = msg[0:self._size]]
+        return val, msg[self._size:]
     @staticmethod
     def toString(val):
         return '"{}"'.format(val)
