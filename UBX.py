@@ -21,6 +21,7 @@ if __name__ == '__main__':
     setPMS = UBX.CFG.PMS.Set(powerSetupValue=2).serialize()
     getPMS = UBX.CFG.PMS.Get().serialize()
     getGNSS = UBX.CFG.GNSS.Get().serialize()
+    getRMX = UBX.CFG.RMX.Get().serialize()
 
     sleep(2)
     sys.stderr.write("sending UBX.MON.VER.Get\n")
@@ -33,5 +34,9 @@ if __name__ == '__main__':
     sleep(2)
     sys.stderr.write("sending UBX.CFG.PMS.Get\n")
     manager.send(getPMS)
+
+    sleep(2)
+    sys.stderr.write("sending UBX.CFG.RMX.Get\n")
+    manager.send(getRMX)
 
     manager.join()
