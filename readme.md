@@ -14,13 +14,14 @@ For example, the `ACK-ACK` and `ACK-NAK` message format is defined in Python lik
 class ACK:
     """Message class ACK."""
     _class = 0x05
-    class ACK:
+    
+    class ACK:		# this is message ACK-ACK
         _id = 0x01
         class Fields:
             clsID = U1(1)
             msgID = U1(2)
 
-    class NAK:
+    class NAK:		# this is message ACK-NAK
         _id = 0x00
         class Fields:
             clsID = U1(1)
@@ -33,11 +34,61 @@ This design introduces some syntactic noise such as the frequent `class` keyword
 
 It is also possible to use these UBX message definitions to generate parsers and generators for other languages, such as C/C++, etc, by using introspection.
 
+Note that the `Fields` class variables have to be numbered, otherwise the exact order of the variables cannot be recovered (Python stores the various `things' belonging to a class in a dict). So the first argument of a type is always an ordering number. The actual numbers don't matter as long as the resulting ordering is correct.
+
+### Repeated blocks
+
+*UBX* often uses repeated blocks. An example is the `MON-VER` message:
+
+```python
+@initMessageClass
+class MON:
+    """Message class MON."""
+    _class = 0x0A
+
+    @addGet
+    class VER:
+        _id = 0x04
+
+        class Fields:
+            swVersion = CH(1, 30, nullTerminatedString=True)
+            hwVersion = CH(2, 10, nullTerminatedString=True)
+            class Repeated:
+                extension = CH(1, 10, nullTerminatedString=True)
+
+```
+
+Here, `swVersion` and `hwVersion` are fixed-length bytestrings that contain a null-terminated ASCII string. The repeated `extension` fields carry additional information.
+
+When `UBXManager` receives a message from the GNSS receiver it tries to parse it. UBX messages are handled by the `onUBX` and `onUBXError` member functions. Here are the signatures of these two functions:
+
+```python
+def onUBX(self, obj)						 # handle good UBX message
+def onUBXError(self, msgClass, msgId, errMsg)  # handle faulty UBX message
+```
+
+The argument `obj` contains a `UBXMessage` object with populated fields. A `UBXMessage` can be pretty-printed with the `__str__` function. A repeated block is unrolled by appending `_n` to the variable names of the fields inside the repeated block. For example, the pretty-printed answer to `UBX.MON.VER.Get` is:
+
+```bash
+MON-VER
+  swVersion="ROM CORE 3.01 (107888)"
+  hwVersion="00080000"
+  extension_1="FWVER=SPG 3.01"
+  extension_2="PROTVER=18.00"
+  extension_3="GPS;GLO;GAL;BDS"
+  extension_4="SBAS;IMES;QZSS"
+```
+
+(This is from a CAM-M8Q module.)
+
 ## What's implemented
 
-- `ACK-ACK` `ACK-NAK` 
-- `CFG-GNSS` `CFG-PM2` `CFG-PSM`
-- `MON-VER`
+- class **`ACK`**:
+  - `ACK` `NAK` 
+- class **`CFG`**:
+  - `GNSS` `PM2` `PSM` `RATE` `RXM`
+- class **`MON`**:
+  - `VER`
 
 ## UBX
 
@@ -101,6 +152,8 @@ class I4:
 
 The decorator `@_InitType` does most of the work: It implements the `__init__`, `__parse__`and `toString` functions and adds the `_size` variable. The `_InitType` decorator needs the `fmt` class variable to be defined, the letter corresponds to the code used in the Python `struct` module.
 
+`CH` and `U` are variable-length types and they are hand-coded. `U` is used for the many *reserved* fields.
+
 ## Protoyping with Python
 
 It is unusual to interface with a chip using Python. Usually this is done in C/C++ using a microcontroller, maybe an Arduino. 
@@ -141,8 +194,8 @@ Here's what we used for testing:
 ### Todo
 
 - Manipulators
-- Support for bitfields
-- Add type `RU1_3` as defined in §31.3.5
+
+Also, have a look at the logged [issues](https://github.com/mayeranalytics/pyUBX/issues) on github.
 
 ## Alternatives
 
