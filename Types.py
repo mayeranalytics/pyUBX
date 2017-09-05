@@ -47,82 +47,81 @@ def stringFromByteString(bs):
     i = bs.find(0)
     return "" if i < 0 else bs[0:i].decode('ascii')
 
-
 @_InitType
 class U1:
     """UBX Unsigned Char."""
     fmt   = "B"
-    ctype = "uint8_t"
+    def ctype(): return "uint8_t"
 
 @_InitType
 class I1:
     """UBX Signed Char."""
     fmt   = "b"
-    ctype = "int8_t"
+    def ctype(): return "int8_t"
 
 @_InitType
 class X1:
     """UBX 1-byte bitfield."""
     fmt   = "B"
-    ctype = "uint8_t"
+    def ctype(): return "uint8_t"
 
 @_InitType
 class U2:
     """UBX Unsigned Short."""
     fmt   = "H"
-    ctype = "uint16_t"
+    def ctype(): return "uint16_t"
 
 @_InitType
 class I2:
     """UBX Signed Short."""
     fmt   = "h"
-    ctype = "int16_t"
+    def ctype(): return "int16_t"
 
 @_InitType
 class X2:
     """UBX 2-byte bitfield."""
     fmt   = "H"
-    ctype = "uint16_t"
+    def ctype(): return "uint16_t"
 
 @_InitType
 class U4:
     """UBX Unsigned Int."""
     fmt   = "I"
-    ctype = "uint32_t"
+    def ctype(): return "uint32_t"
 
 @_InitType
 class I4:
     """UBX Signed Int."""
     fmt   = "i"
-    ctype = "int32_t"
+    def ctype(): return "int32_t"
 
 @_InitType
 class X4:
     """UBX 4-byte bitfield."""
     fmt   = "I"
-    ctype = "uint32_t"
+    def ctype(): return "uint32_t"
 
 @_InitType
 class R4:
     """UBX single precision float."""
     fmt   = "f"
-    ctype = "float"
+    def ctype(): return "float"
 
 @_InitType
 class R8:
     """UBX double precision float."""
     fmt   = "d"
-    ctype = "double"
+    def ctype(): return "double"
 
 class CH:
     """ASCII / ISO 8859.1 Encoding."""
+    fmt = None  # Not needed
     def __init__(self, _ord, N, nullTerminatedString=False):
         self.N = N
-        self.fmt = None  # it isn't needed
         self.ord = _ord
         self._size = N
-        self.ctype = "char[{}]".format(N)
         self._nullTerminatedString = nullTerminatedString
+    def ctype(): return "char[{}]".format(self.N)
     def parse(self, msg):
         if len(msg) < self.N:
             err = "Message length {} is shorter than required {}"\
@@ -132,6 +131,23 @@ class CH:
         if self._nullTerminatedString:
             val = stringFromByteString(val)
         return val, msg[self._size:]
+    @staticmethod
+    def toString(val):
+        return '"{}"'.format(val)
+
+class U:
+    """UBX Unsigned Char."""
+    fmt = None  # Not needed
+    def ctype(): return "uint8_t[{}]".format(self.N)
+    def __init__(self, _ord, N):
+        self._ord = _ord
+        self.N = N
+    def parse(self, msg):
+        if len(msg) != self.N:
+            err = "Message length {} is not equal to the required length {}"\
+                  .format(len(msg), self._size)
+            raise Exception(err)
+        self.data = msg
     @staticmethod
     def toString(val):
         return '"{}"'.format(val)
