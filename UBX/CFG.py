@@ -51,7 +51,7 @@ class CFG:
 
     @addGet
     class PM2:
-        """§31.11.20.2 Extended Power Management configuration."""
+        """§31.11.20 Extended Power Management configuration."""
 
         _id = 0x3B
 
@@ -68,3 +68,22 @@ class CFG:
             minAcqTime = U2(10)  # s  minimal search time
             reserved3 = U(11, 20) 	# Reserved
             extintInactivityMs = U4(12)  # ms  inactivity time out on EXTINT pint if enabled
+
+    @addGet
+    class RXM:
+        """§31.11.27 RXM configuration.
+
+        For a detailed description see section 'Power Management'."""
+
+        _id = 0x11
+
+        class Fields:
+            reserved1 = U1(1)   # reserved
+            lpMode = U1(        # Low Power Mode
+                1,
+                allowed={
+                    0: "Continuous Mode",
+                    1: "Power Save Mode",
+                    4: "Continuous Mode"
+                    }
+            )
