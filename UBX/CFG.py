@@ -43,7 +43,17 @@ class CFG:
             numTrkChUse = U1(3)
             numConfigBlocks = U1(4)
             class Repeated:
-                gnssId = U1(1)
+                gnssId = U1(
+                    1,
+                    allowed={
+                        0: 'GPS',
+                        1: 'SBAS',
+                        2: 'Galileo',
+                        3: 'BeiDou',
+                        4: 'IMES',
+                        5: 'QZSS',
+                        6: 'GLONASS',
+                    })
                 resTrkCh = U1(2)
                 maxTrkCh = U1(3)
                 reserved = U1(4)
@@ -68,6 +78,25 @@ class CFG:
             minAcqTime = U2(10)  # s  minimal search time
             reserved3 = U(11, 20) 	# Reserved
             extintInactivityMs = U4(12)  # ms  inactivity time out on EXTINT pint if enabled
+
+    @addGet
+    class RATE:
+        """§31.11.24 Navigation/Measurement Rate Settings."""
+
+        _id = 0x08
+
+        class Fields:
+            measRate = U2(1)
+            navRate = U2(2)
+            timeRef = U2(
+                3,
+                allowed={
+                    0: "UTC time",
+                    1: "GPS time",
+                    2: "GLONASS time",
+                    3: "BeiDou time",
+                    4: "Galileo time"
+                })
 
     @addGet
     class RXM:
