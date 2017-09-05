@@ -80,7 +80,7 @@ class CFG:
         class Fields:
             reserved1 = U1(1)   # reserved
             lpMode = U1(        # Low Power Mode
-                1,
+                2,
                 allowed={
                     0: "Continuous Mode",
                     1: "Power Save Mode",
