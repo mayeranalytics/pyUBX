@@ -15,7 +15,7 @@ def _InitType(cls):
     """Add the standard __init__ to the class."""
     # 1. add __init__ function to cls
     if cls.__dict__.get('__init__') is None:
-        def __init__(self, _ord):
+        def __init__(self, _ord, allowed=[]):
             self.ord = _ord
         setattr(cls, '__init__', __init__)
     # 2. add parse function to cls
@@ -116,7 +116,7 @@ class R8:
 class CH:
     """ASCII / ISO 8859.1 Encoding."""
     fmt = None  # Not needed
-    def __init__(self, _ord, N, nullTerminatedString=False):
+    def __init__(self, _ord, N, allowed=[], nullTerminatedString=False):
         self.N = N
         self.ord = _ord
         self._size = N
@@ -139,7 +139,7 @@ class U:
     """Variable-length array of unsigned chars."""
     fmt = None  # Not needed
     def ctype(): return "uint8_t[{}]".format(self.N)
-    def __init__(self, _ord, N):
+    def __init__(self, _ord, N, allowed=[]):
         self._ord = _ord
         self.N = N
     def parse(self, msg):
