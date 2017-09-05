@@ -34,6 +34,7 @@ class CFG:
 
     @addGet
     class GNSS:
+        u"""GNSS system configuration. §31.11.10."""
 
         _id = 0x3E
 
@@ -61,7 +62,7 @@ class CFG:
 
     @addGet
     class PM2:
-        """§31.11.20 Extended Power Management configuration."""
+        u"""§31.11.20 Extended Power Management configuration."""
 
         _id = 0x3B
 
@@ -81,7 +82,7 @@ class CFG:
 
     @addGet
     class RATE:
-        """§31.11.24 Navigation/Measurement Rate Settings."""
+        u"""§31.11.24 Navigation/Measurement Rate Settings."""
 
         _id = 0x08
 
@@ -100,9 +101,10 @@ class CFG:
 
     @addGet
     class RXM:
-        """§31.11.27 RXM configuration.
+        u"""§31.11.27 RXM configuration.
 
-        For a detailed description see section 'Power Management'."""
+        For a detailed description see section 'Power Management'.
+        """
 
         _id = 0x11
 
@@ -113,6 +115,6 @@ class CFG:
                 allowed={
                     0: "Continuous Mode",
                     1: "Power Save Mode",
-                    4: "Continuous Mode"
+                    4: "Continuous Mode"    # for ver>=14 0 and 4 are the same
                     }
             )
