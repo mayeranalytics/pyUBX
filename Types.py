@@ -147,7 +147,7 @@ class U:
             err = "Message length {} is shorter than required {}"\
                   .format(len(msg), self._size)
             raise Exception(err)
-        val = msg[0:self._size]]
+        val = msg[0:self._size]
         return val, msg[self._size:]
     @staticmethod
     def toString(val):
