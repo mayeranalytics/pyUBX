@@ -1,7 +1,11 @@
 # pyUBX
 
 This is a small but functional python wrapper for the u-blox M8 UBX protocol, as
-defined in [UBX-13003221 - R13](https://www.u-blox.com/sites/default/files/products/documents/u-blox8-M8_ReceiverDescrProtSpec_(UBX-13003221)_Public.pdf). Only a small subset is implemented. However, this python was designed so that it is very easy to add messages.
+defined in [UBX-13003221 - R13, §31](https://www.u-blox.com/sites/default/files/products/documents/u-blox8-M8_ReceiverDescrProtSpec_(UBX-13003221)_Public.pdf). 
+
+More precisely, it is a parser, message generator, message manipulator. It can also be used as a parser generator for other languages.
+
+Only a small subset is currently implemented. However, this Python library was designed so that it is very easy to add messages.
 
 For example, the `ACK-ACK` and `ACK-NAK` message format is defined in Python like this.
 
@@ -25,13 +29,23 @@ class ACK:
 
 The syntax is quite intuitive. UBX message class and message ID are defined by using member variables `_class` and `_id`. 
 
-Python introduces some syntactic noise such as the frequent `class` keyword, but we feel it's acceptable, in particular since it is correct Python and can therefore be used to generate parsers and writers via introspection. It is also possible to use these UBX message definitions to generate parsers and generators for other languages, such as C, C++, etc.
+This design introduces some syntactic noise such as the frequent `class` keyword and the occasional decorator. It's an acceptable tradeoff: As it is correct Python it can therefore be used parse and manipulate messages. 
+
+It is also possible to use these UBX message definitions to generate parsers and generators for other languages, such as C/C++, etc, by using introspection.
 
 ## What's implemented
 
+- `ACK-ACK` `ACK-NAK` 
+- `CFG-GNSS` `CFG-PM2` `CFG-PSM`
 - `MON-VER`
-- `ACK-ACK`  `ACK-NAK` 
-- `CFG-PSM`  `CFG-GNSS` 
+
+## UBX
+
+`UBX` is a "*u-blox proprietary protocol to communicate with a host computer*". There are
+
+- 9 message classes `UPD ` `MON ` `AID` `TIM` `ESF` `MGA` `LOG` `SEC` `HNR` , and
+- 155 individual messages, many of which have multiple versions
+- `Command` `Get` `Set` `Input` `Output` `Periodic` `Poll Request` `Polled` 
 
 ## Usage
 
@@ -67,24 +81,97 @@ The subclasses capture the message format variations that are used for requestin
 b'\xb5b\n\x04\x00\x00\x0e4'
 ```
 
+# Types
+
+Types are defined in `Types.h`. Currently there are the following:
+
+`U1`, `I1`, `X1`, `U2`, `I2`, `X2`, `U4`, `I4`, `X4`, `R4`, `R8`, `CH`, `U`
+
+and they correspond exactly to the ones defined by u-blox in §31.3.5.
+
+Simple types are defined like this:
+
+```python
+@_InitType
+class I4:
+    """UBX Signed Int."""
+    fmt   = "i"
+    def ctype(): return "int32_t"
+```
+
+The decorator `@_InitType` does most of the work: It implements the `__init__`, `__parse__`and `toString` functions and adds the `_size` variable. The `_InitType` decorator needs the `fmt` class variable to be defined, the letter corresponds to the code used in the Python `struct` module.
+
 ## Protoyping with Python
 
-It is unusual to want to interface with a chip using Python. But we've found that it is desirable to use a high-level language for getting acquanted, learning the interface, and cobbling together prototypes or some mobile test-kit using Rasperry Pis or other single board computers (SBCs) running Linux. (The [C.H.I.P](http://getchip.com) is quite attractive in this regard. It's cheap and it has more IO pins than the Raspberry.)
+It is unusual to interface with a chip using Python. Usually this is done in C/C++ using a microcontroller, maybe an Arduino. 
+
+However, it is desirable to use a high-level language in the early stages of a project where it is key to quickly
+
+- learn the interface/protocol,
+- test new products (chips, modules, antenna configurations),
+- cobble together prototypes or some mobile test-kit
+
+#### Interfacing
+
+The standard serial interfaces, such as UART, I<sup>2</sup>C, SPI, are easy to use with the appropriate USB-to-XYZ adapters.
+
+#### REPL
 
 The Python shell (or even better: [IPython](https://ipython.org/)) provides a [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop) that allows to interactively explore the protocol and the behaviour of the chip.
 
+#### SBCs
+
+For field tests single board computers (SBCs) can be used. Some draw less than 200mA, so a 5Ah USB power bank is more than enough for a day's work. A default choice is the ubiquitous Rasperry Pi. The community is huge and libraries are plentiful. But with only one each of UART, SPI, I<sup>2</sup>C it's not necessarliy the best choice for prototyping. Some alternatives are
+
+- **[C.H.I.P](http://getchip.com)**: Very cheap, with on-board flash, and with slightly more I/O than the Raspberry
+- **[Beaglebone Black](https://beagleboard.org/black)**: Well equipped with on-board flash, 2 x SPI, 2 x I<sup>2</sup>C, 4 x UART, etc., but not so cheap (around 50$).
+- **[Pine64](https://www.pine64.org)**: Rather large and power hungry (300-800mA current draw), but cheap yet powerful with a quad-core A64 processor and [generous I/O](https://drive.google.com/file/d/0B0cEs0lxTtL3YU1CNmJ2bEIzTlE/view).
+- [**UDOO Neo**](https://www.udoo.org/docs-neo/Introduction/Introduction.html): i.MX 6SoloX-based with 3 x UART, 3 x I2C, but only 1 x SPI. The basic version is about 50$.
+
+#### Typical setup
+
+Here's what we used for testing:
+
+- SBC: Raspberry Pi
+- GNSS: CAM-M8Q module on carrier board (80x40mm ground plane), connected via UART
+- Power consumption measurement: [INA219](http://www.ti.com/product/INA219) module, connected via I<sup>2</sup>C
+
 ## Outlook
 
+### Todo
 
+- Manipulators
+- Support for bitfields
+- Add type `RU1_3` as defined in §31.3.5
 
 ## Alternatives
 
-The UBX protocol is rather extensive, so it would have been nice to rely on prior work.
+The UBX protocol takes up about 220 pages of the *Receiver Description*, so is rather extensive and it would have been nice to rely on prior work.
 
 ### Kaitai
 
-We briefly looked at [kaitai](http://kaitai.io, which looks very promising and would have been a good fit. Unfortunately, Kaitai can create parsers (readers)  but it does not allow to create writers. We'll look again at Kaitai when this limitation is lifted. Since the `pyUBX` message definition is written in Python it shouldn't be difficult to generate the necessay `.ksy` yaml files automatically.
+[kaitai](http://kaitai.io looks very promising and would have been a great fit. But, unfortunately, Kaitai can only create parsers (readers)  and it does not allow to create writers and manipulators. We'll look again at Kaitai when this limitation is lifted. Since the `pyUBX` message definition is written in Python it shouldn't be difficult to generate the necessay `.ksy` yaml files automatically.
 
 ### arobenko/ublox
 
-This is a C++11 library available on [github](https://github.com/arobenko/ublox). It is quite comprehensive. It quite heavily relies on the Qt framework which may not be an option on microcontrollers so for us this is not a feasible path.
+This is a C++11 library available on [github](https://github.com/arobenko/ublox). It is quite comprehensive and relies on the Qt framework which is not an option for most microcontrollers.
+
+## Legal stuff
+
+### pyUBX
+
+The `pyUBX` software is GPL 3.0 licensed. The software is provided "as-is". Use it carefully. If you brick your device it's your fault and *only* your fault!!!
+
+### u-blox
+
+U-blox' documentation has a very peculiar copyright note that **strictly prohibits the *use* of the documents without the express permission of u-blox**. Hello u-blox, really???
+
+This is the full text:
+
+> u-blox reserves all rights to this document and the information contained herein. Products, names, logos and designs described herein mayin whole or in part be subject to intellectual property rights. Reproduction, use, modification or disclosure to third parties of this document or any part thereof without the express permission of u-blox is strictly prohibited.
+>
+> The information contained herein is provided “as is” and u-blox assumes no liability for the use of the information. No warranty, eitherexpress or implied, is given, including but not limited, with respect to the accuracy, correctness, reliability and fitness for a particularpurpose of the information. This document may be revised by u-blox at any time. For most recent documents, please visit www.u-blox.com.
+>
+> Copyright © 2017, u-blox AG.
+>
+> u-blox® is a registered trademark of u-blox Holding AG in the EU and other countries. ARM® is the registered trademark of ARM Limitedin the EU and other countries.
