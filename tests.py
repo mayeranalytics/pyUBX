@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Unit tests."""
+
 import unittest
 import UBX
 from UBXMessage import parseUBXPayload, parseUBXMessage
@@ -25,6 +27,15 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(ver.extension_2, "PROTVER=18.00")
         self.assertEqual(ver.extension_3, "GPS;GLO;GAL;BDS")
         self.assertEqual(ver.extension_4, "SBAS;IMES;QZSS")
+
+    def testCFG_GNSS(self):
+        payload = b'\x00\x20\x20\x07\x00\x08\x10\x00\x01\x00\x01\x01\x01\x01\x03\x00\x01\x00\x01\x01\x02\x04\x08\x00\x00\x00\x01\x01\x03\x08\x10\x00\x00\x00\x01\x01\x04\x00\x08\x00\x00\x00\x01\x03\x05\x00\x03\x00\x01\x00\x01\x05\x06\x08\x0e\x00\x01\x00\x01\x01'
+        gnss = parseUBXPayload(UBX.CFG._class, UBX.CFG.GNSS._id, payload)
+        self.assertEqual(gnss.msgVer, 0x00)
+        self.assertEqual(gnss.numConfigBlocks, 0x07)
+        self.assertEqual(gnss.maxTrkCh_1, 0x10)
+        self.assertEqual(gnss.flags_4, 0x01010000)
+        self.assertEqual(gnss.maxTrkCh_7, 0x0E)
 
 
 if __name__ == '__main__':
