@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""TODO."""
+"""A space to play around with messages."""
 
 import UBX
-from UBXMessage import parseUBXPayload, parseUBXMessage
+from UBXMessage import parseUBXPayload
 
 if __name__ == '__main__':
 
