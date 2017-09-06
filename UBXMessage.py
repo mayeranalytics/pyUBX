@@ -30,18 +30,23 @@ class UBXMessage(object):
 
     def __init__(self, msgClass, msgId, payload):
         """Instantiate UBXMessage from MessageClass, messageId and payload."""
-        self.messageClass = bytes([msgClass])
-        self.messageId = bytes([msgId])
+        self._class = bytes([msgClass])
+        self._id = bytes([msgId])
         self._payload = payload
+
+    @staticmethod
+    def make(msgClass, msgId, payload):
+        """Return a proper UBX message from the given class, id and payload."""
+        msg = struct.pack('cc', b'\xb5', b'\x62')
+        msg += struct.pack('cc', msgClass, msgId)
+        msg += struct.pack('<h', len(payload))
+        msg += payload
+        msg += struct.pack('>H', UBXMessage.Checksum(msg[2:]).get())
+        return msg
 
     def serialize(self):
         """Serialize the UBXMessage."""
-        msg = struct.pack('cc', b'\xb5', b'\x62')
-        msg += struct.pack('cc', self.messageClass, self.messageId)
-        msg += struct.pack('<h', len(self._payload))
-        msg += self._payload
-        msg += struct.pack('>H', UBXMessage.Checksum(msg[2:]).get())
-        return msg
+        return UBXMessage.make(self._class, self._id, self._payload)
 
     class Checksum:
         """Incrementally calculate UBX message checksums."""
@@ -151,6 +156,7 @@ def initMessageClass(cls):
         # add __init__ to subclass if necessary
         if sc.__dict__.get('__init__') is None:
             def __init__(self, msg):
+                """Instantiate object from message bytestring."""
                 fieldInfo = _mkFieldInfo(self.Fields)
                 varNames, varTypes = _mkNamesAndTypes(fieldInfo, len(msg))
                 if not varNames:
@@ -168,12 +174,14 @@ def initMessageClass(cls):
                         "Message not fully consumed while parsing a {}!"
                         .format(clsName)
                     )
+                self._class = cls._class
                 self._len = _len
                 self._payload = msg
             setattr(sc, "__init__", __init__)
         # add __str__ to subclass if necessary
         if sc.__dict__.get('__str__') is None:
             def __str__(self):
+                """Return human readable string."""
                 fieldInfo = _mkFieldInfo(self.Fields)
                 varNames, varTypes = _mkNamesAndTypes(fieldInfo, self._len)
                 s = "{}-{}:".format(cls_name, type(self).__name__)
@@ -184,6 +192,20 @@ def initMessageClass(cls):
                         )
                 return s
             setattr(sc, "__str__", __str__)
+        # add serialize to subclass if necessary
+        if sc.__dict__.get('serialize') is None:
+            def serialize(self):
+                """UBX-serialize this object."""
+                fieldInfo = _mkFieldInfo(self.Fields)
+                varNames, varTypes = _mkNamesAndTypes(fieldInfo, self._len)
+                payload = b''
+                for name, typ in zip(varNames, varTypes):
+                    val = getattr(self, name)
+                    payload += typ.serialize(val)
+                return UBXMessage.make(
+                    bytes([self._class]), bytes([self._id]), payload
+                    )
+            setattr(sc, "serialize", serialize)
     return cls
 
 
