@@ -25,6 +25,11 @@ class MessageClass(Enum):
     HNR = b'\x28'  # High Rate Navigation Results Messages: High rate time, position, speed, heading
 
 
+def _byte(i):
+    """Helper function: convert int 0..255 to bytestring byte."""
+    return bytes([i])
+
+
 class UBXMessage(object):
     """Base class for UBX messages."""
 
@@ -32,16 +37,19 @@ class UBXMessage(object):
     sync_char_2 = b'\x62'
 
     def __init__(self, msgClass, msgId, payload):
-        """Instantiate UBXMessage from MessageClass, messageId and payload."""
-        self._class = bytes([msgClass])
-        self._id = bytes([msgId])
+        """Instantiate UBXMessage from MessageClass, messageId and payload.
+
+        msgClass and msgId should be ints.
+        """
+        self._class = msgClass
+        self._id = msgId
         self._payload = payload
 
     @staticmethod
     def make(msgClass, msgId, payload):
         """Return a proper UBX message from the given class, id and payload."""
         msg = struct.pack('cc', UBXMessage.sync_char_1, UBXMessage.sync_char_2)
-        msg += struct.pack('cc', msgClass, msgId)
+        msg += struct.pack('cc', _byte(msgClass), _byte(msgId))
         msg += struct.pack('<h', len(payload))
         msg += payload
         msg += struct.pack('>H', UBXMessage.Checksum(msg[2:]).get())
@@ -66,7 +74,7 @@ class UBXMessage(object):
                 "Calculated checksum 0x{:02x} does not match 0x{:02x}."
                 .format(msgCksum, trueCksum)
                 )
-        return msgClass, msgId, payload
+        return ord(msgClass), ord(msgId), payload
 
     def serialize(self):
         """Serialize the UBXMessage."""
@@ -198,7 +206,6 @@ def initMessageClass(cls):
                         "Message not fully consumed while parsing a {}!"
                         .format(clsName)
                     )
-                self._class = cls._class
                 self._len = _len
                 self._payload = msg
             setattr(sc, "__init__", __init__)
@@ -227,9 +234,11 @@ def initMessageClass(cls):
                     val = getattr(self, name)
                     payload += typ.serialize(val)
                 return UBXMessage.make(
-                    bytes([self._class]), bytes([self._id]), payload
+                    self._class, self._id, payload
                     )
             setattr(sc, "serialize", serialize)
+        # set the '_class' class variable in subclass
+        setattr(sc, '_class', cls._class)
     return cls
 
 
@@ -267,7 +276,7 @@ def parseUBXPayload(msgClass, msgId, payload):
 def parseUBXMessage(msg):
     """Parse a UBX message."""
     msgClass, msgId, payload = UBXMessage.extract(msg)
-    return parseUBXPayload(ord(msgClass), ord(msgId), payload)
+    return parseUBXPayload(msgClass, msgId, payload)
 
 
 def formatByteString(s):
