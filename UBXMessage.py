@@ -57,13 +57,13 @@ class UBXMessage(object):
         if sync1 != UBXMessage.sync_char_1 or sync2 != UBXMessage.sync_char_2:
             raise Exception("Sync chars not correct.")
         msgClass, msgId = struct.unpack('cc', msg[2:4])
-        lenPayload = struct.unpack('<h', msg[4:6])
+        lenPayload = struct.unpack('<h', msg[4:6])[0]
         payload = msg[6:(6+lenPayload)]
-        trueCksum = UBXMessage.Checksum(payload).get()
-        msgCksum = struct.unpack('>H', msg[6+lenPayload:])
+        trueCksum = UBXMessage.Checksum(msg[2:(len(msg)-2)]).get()
+        msgCksum = struct.unpack('>H', msg[6+lenPayload:])[0]
         if trueCksum != msgCksum:
             raise Exception(
-                "Calculated checksum {} does not match {}."
+                "Calculated checksum 0x{:02x} does not match 0x{:02x}."
                 .format(msgCksum, trueCksum)
                 )
         return msgClass, msgId, payload
@@ -253,18 +253,21 @@ def parseUBXPayload(msgClass, msgId, payload):
     """Parse a UBX payload from message class, message ID and payload."""
     Cls = classFromMessageClass().get(msgClass)
     if Cls is None:
-        raise Exception("Cannot parse message class {}".format(msgClass))
+        err = "Cannot parse message class {}.\n Available: {}"\
+              .format(msgClass, classFromMessageClass())
+        raise Exception(err)
     Subcls = Cls._lookup.get(msgId)
     if Subcls is None:
-        raise Exception("Cannot parse message ID {} of message class {}"
-                        .format(msgId, msgClass.__name__))
+        raise Exception(
+            "Cannot parse message ID {} of message class {}.\n Available: {}"
+            .format(msgId, msgClass.__name__, Cls._lookup))
     return Subcls(payload)
 
 
 def parseUBXMessage(msg):
     """Parse a UBX message."""
-    msgClass, msgId, payload = UBXMessages.extract(msg)
-    return parseUBXMessage(msgClass, msgId, payload)
+    msgClass, msgId, payload = UBXMessage.extract(msg)
+    return parseUBXPayload(ord(msgClass), ord(msgId), payload)
 
 
 def formatByteString(s):
