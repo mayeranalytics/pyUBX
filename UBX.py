@@ -63,7 +63,6 @@ class FSM_RXM_Set:
         return self.state == FSM_RXM_Set.STATE.DONE
     def onUBX(self, obj, manager):
         if self.state == FSM_RXM_Set.STATE.START:
-            print("START->\n", obj)
             if isObj(obj, UBX.CFG.RXM):
                 self._gottenObj = obj
                 self.state = FSM_RXM_Set.STATE.WAIT_GET_ACK
@@ -71,7 +70,6 @@ class FSM_RXM_Set:
                 print("Didnt' get a UBX.CFG.RXM")
                 self.state = FSM_RXM_Set.STATE.DONE
         elif self.state == FSM_RXM_Set.STATE.WAIT_GET_ACK:
-            print("WAIT_GET_ACK->\n", obj)
             if isACK(obj):
                 self._gottenObj.lpMode = self.lpMode
                 manager.send(self._gottenObj.serialize())
@@ -80,14 +78,12 @@ class FSM_RXM_Set:
                 print("Ooops that went wrong")
                 self.state = FSM_RXM_Set.STATE.DONE
         elif self.state == FSM_RXM_Set.STATE.WAIT_SET_ACK:
-            print("WAIT_SET_ACK->\n", obj)
             if isACK(obj):
                 self.state = FSM_RXM_Set.STATE.DONE
             else:
                 print("Ooops that went wrong")
                 self.state = FSM_RXM_Set.STATE.DONE
         else:
-            print("HOW?->\n", obj)
             raise Exception("The FSM went boink.")
 
 
