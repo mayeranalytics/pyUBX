@@ -28,6 +28,9 @@ class MessageClass(Enum):
 class UBXMessage(object):
     """Base class for UBX messages."""
 
+    sync_char_1 = b'\xb5'
+    sync_char_2 = b'\x62'
+
     def __init__(self, msgClass, msgId, payload):
         """Instantiate UBXMessage from MessageClass, messageId and payload."""
         self._class = bytes([msgClass])
@@ -37,12 +40,33 @@ class UBXMessage(object):
     @staticmethod
     def make(msgClass, msgId, payload):
         """Return a proper UBX message from the given class, id and payload."""
-        msg = struct.pack('cc', b'\xb5', b'\x62')
+        msg = struct.pack('cc', UBXMessage.sync_char_1, UBXMessage.sync_char_2)
         msg += struct.pack('cc', msgClass, msgId)
         msg += struct.pack('<h', len(payload))
         msg += payload
         msg += struct.pack('>H', UBXMessage.Checksum(msg[2:]).get())
         return msg
+
+    @staticmethod
+    def extract(msg):
+        """Return msgClass, msgId, payload from given message.
+
+        This is the inverse of make(), used mostly for debugging purposes.
+        """
+        (sync1, sync2) = struct.unpack('cc', msg[0:2])
+        if sync1 != UBXMessage.sync_char_1 or sync2 != UBXMessage.sync_char_2:
+            raise Exception("Sync chars not correct.")
+        msgClass, msgId = struct.unpack('cc', msg[2:4])
+        lenPayload = struct.unpack('<h', msg[4:6])
+        payload = msg[6:(6+lenPayload)]
+        trueCksum = UBXMessage.Checksum(payload).get()
+        msgCksum = struct.unpack('>H', msg[6+lenPayload:])
+        if trueCksum != msgCksum:
+            raise Exception(
+                "Calculated checksum {} does not match {}."
+                .format(msgCksum, trueCksum)
+                )
+        return msgClass, msgId, payload
 
     def serialize(self):
         """Serialize the UBXMessage."""
@@ -225,8 +249,8 @@ def classFromMessageClass():
     ])
 
 
-def parseUBXMessage(msgClass, msgId, payload):
-    """Parse a UBX message from message class, message ID and payload."""
+def parseUBXPayload(msgClass, msgId, payload):
+    """Parse a UBX payload from message class, message ID and payload."""
     Cls = classFromMessageClass().get(msgClass)
     if Cls is None:
         raise Exception("Cannot parse message class {}".format(msgClass))
@@ -235,6 +259,12 @@ def parseUBXMessage(msgClass, msgId, payload):
         raise Exception("Cannot parse message ID {} of message class {}"
                         .format(msgId, msgClass.__name__))
     return Subcls(payload)
+
+
+def parseUBXMessage(msg):
+    """Parse a UBX message."""
+    msgClass, msgId, payload = UBXMessages.extract(msg)
+    return parseUBXMessage(msgClass, msgId, payload)
 
 
 def formatByteString(s):
