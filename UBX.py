@@ -62,6 +62,7 @@ class FSM_RXM_Set:
     def done(self):
         return self.state == FSM_RXM_Set.STATE.DONE
     def onUBX(self, obj, manager):
+        print(obj)
         if self.state == FSM_RXM_Set.STATE.START:
             if isObj(obj, UBX.CFG.RXM):
                 self._gottenObj = obj
