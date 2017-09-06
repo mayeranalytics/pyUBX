@@ -179,9 +179,9 @@ class UBXManager(threading.Thread):
         print("NMEA ERR: {}".format(errMsg))
 
     def _onUBX(self, msgClass, msgId, buffer):
-        from UBXMessage import parseUBXMessage, formatByteString
+        from UBXMessage import parseUBXPayload, formatByteString
         try:
-            obj = parseUBXMessage(msgClass, msgId, buffer)
+            obj = parseUBXPayload(msgClass, msgId, buffer)
         except Exception as e:
             errMsg = "No parse, \"{}\", payload={}".format(
                      e, formatByteString(buffer))
