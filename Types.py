@@ -5,7 +5,7 @@ Each type must have a variable typ and ord.
 - ord: Contains a sequential ordering number
 """
 
-from struct import Struct, unpack
+from struct import Struct, unpack, pack
 
 # Note: All classes listed here must be also listed in UBXMessages.py,
 # function classFromMessageClass !!
@@ -25,7 +25,6 @@ def _InitGenericType(cls):
                 err = "Message length {} is shorter than required {}"\
                       .format(len(msg), self._size)
                 raise Exception(err)
-
             val = unpack(self.fmt, msg[0:self._size])[0]
             return val, msg[self._size:]
         setattr(cls, "parse", parse)
@@ -39,6 +38,11 @@ def _InitGenericType(cls):
             return ("0x{:0" + str(cls._size*2) + "X}")\
                    .format(val)
         setattr(cls, 'toString', toString)
+    # 5. add serialize method
+    if cls.__dict__.get('serialize') is None:
+        def serialize(self, val):
+            return pack(self.fmt, val)
+        setattr(cls, 'serialize', serialize)
     return cls
 
 
@@ -134,6 +138,11 @@ class CH:
     @staticmethod
     def toString(val):
         return '"{}"'.format(val)
+    def serialize(self, val):
+        if len(val) != self.N:
+            err = "Value length {} not equal to the required {}"\
+                  .format(len(val), self._size)
+            raise Exception(err)
 
 class U:
     """Variable-length array of unsigned chars."""
@@ -152,3 +161,9 @@ class U:
     @staticmethod
     def toString(val):
         return '"{}"'.format(val)
+    def serialize(self, val):
+        if len(val) != self.N:
+            err = "Value length {} not equal to the required {}"\
+                  .format(len(val), self._size)
+            raise Exception(err)
+        return val
