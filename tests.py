@@ -8,6 +8,16 @@ from UBXMessage import parseUBXPayload, parseUBXMessage
 
 class TestStringMethods(unittest.TestCase):
 
+    def testClassId1(self):
+        getVer = UBX.MON.VER.Get()
+        self.assertEqual(getVer._class, 0x0A)
+        self.assertEqual(getVer._id, 0x04)
+
+    def testClassId2(self):
+        self.assertEqual(UBX.MON._class, 0x0A)
+        self.assertEqual(UBX.MON.VER._class, 0x0A)
+        self.assertEqual(UBX.MON.VER._id, 0x04)
+
     def testRXM(self):
         rxm = UBX.CFG.RXM(b'\x48\x00')
         self.assertEqual(rxm.reserved1, 0x48)
