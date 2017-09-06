@@ -29,6 +29,7 @@ class UBXManager(threading.Thread):
         threading.Thread.__init__(self)
         self.ser = ser
         self.debug = debug
+        self._shutDown = False
         self.ubx_chksum = UBXMessage.Checksum()
 
     def run(self):
@@ -51,7 +52,7 @@ class UBXManager(threading.Thread):
             logfile = open("UBX.log", "wb")
             sys.stderr.write("Writing log to UBX.log\n")
         self._reset()
-        while True:
+        while not self._shutDown:
             byte = self.ser.read(1)
             if self.debug:
                 logfile.write(byte)
@@ -207,3 +208,7 @@ class UBXManager(threading.Thread):
         if self.debug:
             print("SEND: {}".format(formatByteString(msg)))
         self.ser.write(msg)
+
+    def shutdown(self):
+        """Stop the manger."""
+        self._shutDown = True
