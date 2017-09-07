@@ -4,9 +4,9 @@ This is a small but functional Python3 wrapper for the u-blox M8 UBX protocol, a
 defined in [UBX-13003221 - R13, §31](https://www.u-blox.com/sites/default/files/products/documents/u-blox8-M8_ReceiverDescrProtSpec_(UBX-13003221)_Public.pdf). The focus is on getting the basics right, which first of all means  correctly creating and parsing UBX messages with usable error messages on failure. The key features are:
 
 - parse, generate and manipulate UBX messages
-- make it easy to add new message definitions
+- message definitions are simple, uncluttered Python code (class definitions)
 - decorators keep the boilerplate code at a minimum
-- allow to interact with a device using a REPL
+- interact with a device using a REPL
 - use as a parser generator for other languages or definition files for other parser generators
 
 **Only a small subset is currently implemented!** 
@@ -194,7 +194,7 @@ ACK-ACK:
   msgID=0x08
 ```
 
-Not that always all UBX messages are printed, including the `ACK-ACK`.
+Note that always all UBX messages are printed, including the `ACK-ACK`.
 
 ##### Usage
 
