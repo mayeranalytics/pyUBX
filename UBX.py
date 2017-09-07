@@ -8,40 +8,35 @@ from time import sleep
 from threading import Lock
 from enum import Enum
 import argparse
+import datetime
 import UBX
 from UBXManager import UBXManager
+from FSM import *
 
 
+@FSM_Get(UBX.MON.VER)
 class FSM_VER_Get:
-    """FSM handling MON.VER.Get"""
-    _class = UBX.MON.VER._class
-    _id = UBX.MON.VER._id
-    class STATE(Enum):
-        START = 0
-        DONE = 1
-    def __init__(self):
-        self.state = FSM_VER_Get.STATE.START
-        self.ver = None
-    def done(self):
-        return self.state == FSM_VER_Get.STATE.DONE
-    def onUBX(self, obj, manager):
-        if obj._class == FSM_VER_Get._class and obj._id == FSM_VER_Get._id:
-            print(obj)
-            self.state = FSM_VER_Get.STATE.DONE
+    pass
 
 
-def isObj(obj, cls):
-    return obj._class == cls._class and obj._id == cls._id
+@FSM_Get(UBX.CFG.GNSS)
+class FSM_GNSS_Get:
+    pass
 
 
-def isACK(obj):
-    """Test whether message obj is a ACK."""
-    return isObj(obj, UBX.ACK.ACK)
+@FSM_Get(UBX.CFG.PMS)
+class FSM_PMS_Get:
+    pass
 
 
-def isNAK(obj):
-    """Test whether message obj is a NAK."""
-    return isObj(obj, UBX.ACK.NAK)
+@FSM_Get(UBX.CFG.PM2)
+class FSM_PM2_Get:
+    pass
+
+
+@FSM_Get(UBX.CFG.RATE)
+class FSM_RATE_Get:
+    pass
 
 
 class FSM_RXM_Set:
@@ -76,13 +71,13 @@ class FSM_RXM_Set:
                 manager.send(self._gottenObj.serialize())
                 self.state = FSM_RXM_Set.STATE.WAIT_SET_ACK
             else:
-                print("Ooops that went wrong")
+                print("Ooops that went wrong, I was expecting an ACK")
                 self.state = FSM_RXM_Set.STATE.DONE
         elif self.state == FSM_RXM_Set.STATE.WAIT_SET_ACK:
             if isACK(obj):
                 self.state = FSM_RXM_Set.STATE.DONE
             else:
-                print("Ooops that went wrong")
+                print("Ooops that went wrong, I was expecting an ACK")
                 self.state = FSM_RXM_Set.STATE.DONE
         else:
             raise Exception("The FSM went boink.")
@@ -113,7 +108,7 @@ class Manager(UBXManager):
         with self._lock:
             dump = self._dumpNMEA
         if dump:
-            print(buffer)
+            print("{} {}".format(datetime.datetime.now().isoformat(), buffer))
     def done(self):
         with self._lock:
             return self._fsm is None
@@ -125,12 +120,32 @@ class Manager(UBXManager):
             if timeout is not None and sleepTime > timeout:
                 return False
         return True
-    def getVER(self):
+    def VER_GET(self):
         msg = UBX.MON.VER.Get().serialize()
         with self._lock:
             self._fsm = FSM_VER_Get()
         self.send(msg)
-    def setRXM(self, lpMode):
+    def GNSS_GET(self):
+        msg = UBX.CFG.GNSS.Get().serialize()
+        with self._lock:
+            self._fsm = FSM_GNSS_Get()
+        self.send(msg)
+    def PMS_GET(self):
+        msg = UBX.CFG.PMS.Get().serialize()
+        with self._lock:
+            self._fsm = FSM_PMS_Get()
+        self.send(msg)
+    def PM2_GET(self):
+        msg = UBX.CFG.PM2.Get().serialize()
+        with self._lock:
+            self._fsm = FSM_PM2_Get()
+        self.send(msg)
+    def RATE_GET(self):
+        msg = UBX.CFG.RATE.Get().serialize()
+        with self._lock:
+            self._fsm = FSM_RATE_Get()
+        self.send(msg)
+    def RXM_SET(self, lpMode):
         msg = UBX.CFG.RXM.Get().serialize()
         with self._lock:
             self._fsm = FSM_RXM_Set(lpMode)
@@ -143,12 +158,32 @@ if __name__ == '__main__':
         description='Send UBX commands to u-blox M8 device.'
         )
     parser.add_argument(
-        '--VER', dest='VER', action='store_true',
+        '--VER-GET', dest='VER_GET', action='store_true',
         help='Get the version string'
+        )
+    parser.add_argument(
+        '--GNSS-GET', dest='GNSS_GET', action='store_true',
+        help='Get CFG-GNSS'
+        )
+    parser.add_argument(
+        '--PMS-GET', dest='PMS_GET', action='store_true',
+        help='Get CFG-PMS'
+        )
+    parser.add_argument(
+        '--PM2-GET', dest='PM2_GET', action='store_true',
+        help='Get CFG-PM2'
+        )
+    parser.add_argument(
+        '--RATE-GET', dest='RATE_GET', action='store_true',
+        help='Get CFG-RATE'
         )
     parser.add_argument(
         '--RXM', dest='RXM', action='store', type=int,
         help='Set the power mode (0=cont, 1=save)'
+        )
+    parser.add_argument(
+        '--NMEA', dest='NMEA', action='store_true',
+        help='Dump NMEA messages.'
         )
     parser.add_argument(
         '-d', '--debug', dest='debug', action='store_true',
@@ -160,47 +195,28 @@ if __name__ == '__main__':
     debug = (os.environ.get("DEBUG") is not None) or args.debug
 
     manager = Manager(ser, debug=debug)
-    manager.setDumpNMEA(False)  # turn off NMEA print
+    manager.setDumpNMEA(False)  # temporarily turn off NMEA print
     if debug:
         sys.stderr.write("Starting UBXManager...\n")
     manager.start()
 
     sleep(1)
 
-    if args.VER:
-        manager.getVER()
-        manager.waitUntilDone()
+    # do all getters
+    for argName in filter(lambda s: s.endswith("_GET"), args.__dict__.keys()):
+        if args.__dict__[argName]:
+            getattr(manager, argName)()
+            manager.waitUntilDone()
 
     if args.RXM is not None:
-        manager.setRXM(args.RXM)
+        manager.RXM_SET(args.RXM)
         manager.waitUntilDone()
 
-    manager.shutdown()
-    sys.exit(0)
+    if args.NMEA:
+        manager.setDumpNMEA(True)
+        manager.join()
+    else:
+        manager.shutdown()
+        sys.exit(0)
 
-    getVER = UBX.MON.VER.Get().serialize()
-    setPMS = UBX.CFG.PMS.Set(powerSetupValue=2).serialize()
-    getPMS = UBX.CFG.PMS.Get().serialize()
-    getGNSS = UBX.CFG.GNSS.Get().serialize()
-    getRXM = UBX.CFG.RXM.Get().serialize()
-
-    sleep(2)
-    sys.stderr.write("sending UBX.MON.VER.Get\n")
-    manager.send(getVER)
-
-    sleep(2)
-    sys.stderr.write("sending UBX.CFG.GNSS.Get\n")
-    manager.send(getGNSS)
-
-    sleep(2)
-    sys.stderr.write("sending UBX.CFG.PMS.Get\n")
-    manager.send(getPMS)
-
-    sleep(2)
-    sys.stderr.write("sending UBX.CFG.RXM.Get\n")
-    manager.send(getRXM)
-
-    sleep(2)
-    manager.setDumpNMEA(True)
-
-    manager.join()
+    sys.exit(1)
