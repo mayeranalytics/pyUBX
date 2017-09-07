@@ -1,11 +1,25 @@
 # pyUBX
 
-This is a small but functional python wrapper for the u-blox M8 UBX protocol, as
-defined in [UBX-13003221 - R13, §31](https://www.u-blox.com/sites/default/files/products/documents/u-blox8-M8_ReceiverDescrProtSpec_(UBX-13003221)_Public.pdf). 
+This is a small but functional Python3 wrapper for the u-blox M8 UBX protocol, as
+defined in [UBX-13003221 - R13, §31](https://www.u-blox.com/sites/default/files/products/documents/u-blox8-M8_ReceiverDescrProtSpec_(UBX-13003221)_Public.pdf). The focus is on getting the basics right, which first of all means  correctly creating and parsing UBX messages with usable error messages on failure. The key features are:
 
-More precisely, it is a parser, message generator, message manipulator. It can also be used as a parser generator for other languages.
+- parse, generate and manipulate UBX messages
+- make it easy to add new message definitions
+- decorators keep the boilerplate code at a minimum
+- allow to interact with a device using a REPL
+- use as a parser generator for other languages or definition files for other parser generators
 
-Only a small subset is currently implemented. However, this Python library was designed so that it is very easy to add messages.
+**Only a small subset is currently implemented!** 
+
+#### UBX
+
+`UBX` is a "*u-blox proprietary protocol to communicate with a host computer*". There are
+
+- 9 message classes `UPD ` `MON ` `AID` `TIM` `ESF` `MGA` `LOG` `SEC` `HNR` , and
+- 155 individual messages, many of which have multiple versions
+- `Command` `Get` `Set` `Input` `Output` `Periodic` `Poll Request` `Polled` 
+
+#### Message definitions
 
 For example, the `ACK-ACK` and `ACK-NAK` message format is defined in Python like this.
 
@@ -90,14 +104,6 @@ MON-VER
 - class **`MON`**:
   - `VER`
 
-## UBX
-
-`UBX` is a "*u-blox proprietary protocol to communicate with a host computer*". There are
-
-- 9 message classes `UPD ` `MON ` `AID` `TIM` `ESF` `MGA` `LOG` `SEC` `HNR` , and
-- 155 individual messages, many of which have multiple versions
-- `Command` `Get` `Set` `Input` `Output` `Periodic` `Poll Request` `Polled` 
-
 ## Usage
 
 The two main classes are `UBXManager` and `UBXMessage`. They are defined in files with the same name.
@@ -113,13 +119,15 @@ ser = serial.Serial('/dev/ttyAMA0', 9600, timeout=None)
 manager = UBXManager(ser, debug=True)
 ```
 
+The manager can be instantiated with any serial object that has a `read(n)` function that reads `n` bytes from the stream. Nothing more is required (in fact all it needs is `read(1)`).
+
 The manager thread is then started like this:
 
 ```python
 manager.start()	
 ```
 
-By default `UBXManager` dumps all `NMEA` and `UBX` messages to stdout. By deriving and overriding the member functions `onNMEA`, `onNMEAERR`, `onUBX`, `onUBXErr` this behaviour can be changed.
+By default `UBXManager` dumps all `NMEA` and `UBX` messages to stdout. By deriving and overriding the member functions `onNMEA`, `onNMEAError`, `onUBX`, `onUBXError` this behaviour can be changed.
 
 ### `UBXMessage`
 
@@ -132,7 +140,18 @@ The subclasses capture the message format variations that are used for requestin
 b'\xb5b\n\x04\x00\x00\x0e4'
 ```
 
-# Types
+### Get-modify-set
+
+A typical usage pattern is get-modify-set:
+
+```python
+rxm = UBX.CFG.RXM(b'\x48\x00') # create a message
+rxm.lpMode = 1                 # power save mode (see §31.11.27)
+msg = rxm.serialize()          # make new message
+# send(msg)
+```
+
+### Types
 
 Types are defined in `Types.h`. Currently there are the following:
 
@@ -146,13 +165,58 @@ Simple types are defined like this:
 @_InitType
 class I4:
     """UBX Signed Int."""
-    fmt   = "i"
-    def ctype(): return "int32_t"
+    fmt = "i"		# used by the decorator _InitType
+    def ctype(): return "int32_t"	# for future use
 ```
 
 The decorator `@_InitType` does most of the work: It implements the `__init__`, `__parse__`and `toString` functions and adds the `_size` variable. The `_InitType` decorator needs the `fmt` class variable to be defined, the letter corresponds to the code used in the Python `struct` module.
 
 `CH` and `U` are variable-length types and they are hand-coded. `U` is used for the many *reserved* fields.
+
+### `UBX.py`
+
+`UBX.py` is a utlilty that allows to send UBX commands to the device. For example, to switch into power save mode and then start umping NMEA messages, run
+
+```bash
+./UBX.py --RXM 1 --NMEA
+```
+
+The content of the `CFG-RATE` register can queried like so:
+
+```bash
+> ./UBX.py --RATE-GET
+CFG-RATE:
+  measRate=0x03E8
+  navRate=0x0001
+  timeRef=0x0001
+ACK-ACK:
+  clsID=0x06
+  msgID=0x08
+```
+
+Not that always all UBX messages are printed, including the `ACK-ACK`.
+
+##### Usage
+
+```bash
+usage: UBX.py [-h] [--VER-GET] [--GNSS-GET] [--PMS-GET] [--PM2-GET]
+              [--RATE-GET] [--RXM RXM] [--NMEA] [-d]
+
+Send UBX commands to u-blox M8 device.
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --VER-GET    Get the version string
+  --GNSS-GET   Get CFG-GNSS
+  --PMS-GET    Get CFG-PMS
+  --PM2-GET    Get CFG-PM2
+  --RATE-GET   Get CFG-RATE
+  --RXM RXM    Set the power mode (0=cont, 1=save)
+  --NMEA       Dump NMEA messages.
+  -d, --debug  Turn on debug mode
+```
+
+`UBX.py` uses finite state machines defined in `FSM.py`. The `Manager` class derives from `UBXManager` and overrides the `onUBX`, etc., callbacks.
 
 ## Protoyping with Python
 
@@ -179,7 +243,11 @@ For field tests single board computers (SBCs) can be used. Some draw less than 2
 - **[C.H.I.P](http://getchip.com)**: Very cheap, with on-board flash, and with slightly more I/O than the Raspberry
 - **[Beaglebone Black](https://beagleboard.org/black)**: Well equipped with on-board flash, 2 x SPI, 2 x I<sup>2</sup>C, 4 x UART, etc., but not so cheap (around 50$).
 - **[Pine64](https://www.pine64.org)**: Rather large and power hungry (300-800mA current draw), but cheap yet powerful with a quad-core A64 processor and [generous I/O](https://drive.google.com/file/d/0B0cEs0lxTtL3YU1CNmJ2bEIzTlE/view).
-- [**UDOO Neo**](https://www.udoo.org/docs-neo/Introduction/Introduction.html): i.MX 6SoloX-based with 3 x UART, 3 x I2C, but only 1 x SPI. The basic version is about 50$.
+- [**UDOO Neo**](https://www.udoo.org/docs-neo/Introduction/Introduction.html): i.MX 6SoloX-based with 3 x UART, 3 x I<sup>2</sup>C, but only 1 x SPI. The basic version is about 50$.
+
+#### Migration to C/C++, etc.
+
+@Todo
 
 #### Typical setup
 
@@ -193,37 +261,41 @@ Here's what we used for testing:
 
 ### Todo
 
-- Manipulators
+- Manipulators/accessors
 
-Also, have a look at the logged [issues](https://github.com/mayeranalytics/pyUBX/issues) on github.
+Also have a look at the logged [enhancement requests](https://github.com/mayeranalytics/pyUBX/issues?q=is:open+is:issue+label:enhancement) on github.
 
 ## Alternatives
 
-The UBX protocol takes up about 220 pages of the *Receiver Description*, so is rather extensive and it would have been nice to rely on prior work.
+The UBX protocol takes up about 220 pages of the *Receiver Description*, so is rather extensive and it would have been nice to rely on prior work. Almost all libraries we could find are hand-crafted C libraries. It's hard to imagine that this manual approach resulted in bug-free code.
 
 ### Kaitai
 
-[kaitai](http://kaitai.io looks very promising and would have been a great fit. But, unfortunately, Kaitai can only create parsers (readers)  and it does not allow to create writers and manipulators. We'll look again at Kaitai when this limitation is lifted. Since the `pyUBX` message definition is written in Python it shouldn't be difficult to generate the necessay `.ksy` yaml files automatically.
+[Kaitai](http://kaitai.io) is a parser generator for binary structures. It looks very promising and would have been a great fit. Unfortunately, Kaitai can only create parsers but not writers (serializers). We'll look again at Kaitai when this limitation is lifted. Since the `pyUBX` message definition is written in Python it shouldn't be difficult to generate the necessay `.ksy` yaml files automatically.
 
 ### arobenko/ublox
 
-This is a C++11 library available on [github](https://github.com/arobenko/ublox). It is quite comprehensive and relies on the Qt framework which is not an option for most microcontrollers.
+This quite comprehensive C++11 library is available on [github](https://github.com/arobenko/ublox). It relies on the Qt framework - not an option for most microcontrollers.
+
+### libMGA
+
+U-blox own library called *libMGA* can be obtained, according to the [forum](https://forum.u-blox.com/index.php?qa=748&qa_1=source-code-libmga-where-can-this-be-acquired), by contacting u-blox.
 
 ## Legal stuff
 
 ### pyUBX
 
-The `pyUBX` software is GPL 3.0 licensed. The software is provided "as-is". Use it carefully. If you brick your device it's your fault and *only* your fault!!!
+The `pyUBX` software is GPL 3.0 licensed. The software is provided "as-is". Use it carefully. If you brick your device it's your, and *only* your fault!!!
 
 ### u-blox
 
-U-blox' documentation has a very peculiar copyright note that **strictly prohibits the *use* of the documents without the express permission of u-blox**. Hello u-blox, really???
+U-blox' documentation has a very peculiar copyright note that **strictly prohibits the *use* of the documents without the express permission of u-blox**. U-blox reacted quickly when confronted with it on the [forum](https://forum.u-blox.com/index.php?qa=13486&qa_1=weird-copyright-notice-of-u-blox-documentation). It's probably safe to dismiss parts of this disclaimer as unreasonably broad.
 
-This is the full text:
+This is the full text of the disclaimer:
 
 > u-blox reserves all rights to this document and the information contained herein. Products, names, logos and designs described herein mayin whole or in part be subject to intellectual property rights. Reproduction, use, modification or disclosure to third parties of this document or any part thereof without the express permission of u-blox is strictly prohibited.
 >
-> The information contained herein is provided “as is” and u-blox assumes no liability for the use of the information. No warranty, eitherexpress or implied, is given, including but not limited, with respect to the accuracy, correctness, reliability and fitness for a particularpurpose of the information. This document may be revised by u-blox at any time. For most recent documents, please visit www.u-blox.com.
+> The information contained herein is provided “as is” and u-blox assumes no liability for the use of the information. No warranty, either express or implied, is given, including but not limited, with respect to the accuracy, correctness, reliability and fitness for a particularpurpose of the information. This document may be revised by u-blox at any time. For most recent documents, please visit www.u-blox.com.
 >
 > Copyright © 2017, u-blox AG.
 >
