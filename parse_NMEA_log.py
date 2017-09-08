@@ -19,17 +19,15 @@ if len(sys.argv) < 2:
     sys.stderr.write("Usage:\n  parse_NMEA_log.py FILENAME\n")
     sys.exit(1)
 
-filename = sys.argv[1]
-file = open(filename, "r")
+with open(sys.argv[1], "r") as file:
 
-errCount = 0
-for line in file.readlines():
-    try:
-        [dt, NMEA] = line.strip().split(" ")
-    except:
-        errCount += 1
-    NMEA = "${}*{}".format(NMEA, NMEAChkSum(NMEA))
-    print(NMEA)
+    errCount = 0
+    for line in file.readlines():
+        try:
+            [dt, NMEA] = line.strip().split(" ")
+        except:
+            errCount += 1
+        print("${}*{}".format(NMEA, NMEAChkSum(NMEA)))
 
-if errCount:
-    sys.stderr.write("Found {} bad lines.\n".format(errCount))
+    if errCount:
+        sys.stderr.write("Found {} bad lines.\n".format(errCount))
