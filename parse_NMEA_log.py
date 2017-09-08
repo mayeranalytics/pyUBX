@@ -3,8 +3,6 @@
 proper NMEA with $ and * and checksum. This output can then be used with other
 tools."""
 
-import UBX
-from UBXManager import UBXManager
 import sys
 
 
@@ -16,7 +14,7 @@ def NMEAChkSum(line):
     return '{:02x}'.format(chksum)
 
 if len(sys.argv) < 2:
-    sys.stderr.write("Usage:\n  parse_NMEA_log.py FILENAME\n")
+    sys.stderr.write("Usage:\n  parse_NMEA_log.py FILENAME\n\n" + __doc__)
     sys.exit(1)
 
 with open(sys.argv[1], "r") as file:
