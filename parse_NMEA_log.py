@@ -25,7 +25,8 @@ with open(sys.argv[1], "r") as file:
             [dt, NMEA] = line.strip().split(" ")
         except:
             errCount += 1
-        print("${}*{}".format(NMEA, NMEAChkSum(NMEA)))
+        else:
+            print("${}*{}".format(NMEA, NMEAChkSum(NMEA)))
 
     if errCount:
         sys.stderr.write("Found {} bad lines.\n".format(errCount))
