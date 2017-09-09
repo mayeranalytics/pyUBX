@@ -97,7 +97,7 @@ class Manager(UBXManager):
     def onUBX(self, obj):
         with self._lock:
             if self._fsm is not None:
-                self._fsm.onUBX(obj, manager)
+                self._fsm.onUBX(obj, self)
                 if self._fsm.done():
                     self._fsm = None
             else:
