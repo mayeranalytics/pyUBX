@@ -44,7 +44,7 @@ class ACK:
 
 The syntax is quite intuitive. UBX message class and message ID are defined by using member variables `_class` and `_id`. 
 
-This design introduces some syntactic noise such as the frequent `class` keyword and the occasional decorator. It's an acceptable tradeoff: As it is correct Python it can therefore be used parse and manipulate messages. 
+This design introduces some syntactic noise such as the frequent `class` keyword and the occasional decorator. It's an acceptable tradeoff: As it is correct Python it can therefore be used to parse and manipulate messages. 
 
 It is also possible to use these UBX message definitions to generate parsers and generators for other languages, such as C/C++, etc, by using introspection.
 
