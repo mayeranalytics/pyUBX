@@ -1,6 +1,6 @@
 """Ack/Nak Messages: Acknowledge or Reject messages to CFG input messages."""
 
-from UBXMessage import initMessageClass
+from UBXMessage import initMessageClass, addGet
 from Types import U1
 
 
@@ -10,6 +10,7 @@ class ACK:
 
     _class = 0x05
 
+    @addGet
     class ACK:
 
         _id = 0x01

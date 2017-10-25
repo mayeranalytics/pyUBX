@@ -6,6 +6,8 @@ from UBXMessage import parseUBXPayload
 
 if __name__ == '__main__':
 
+    print("UBX.ACK.ACK.Get: ", UBX.ACK.ACK.Get().serialize())
+
     print("UBX.CFG.PMS.Get: ", UBX.CFG.PMS.Get().serialize())
 
     print("UBX.CFG.PMS.Set: ", UBX.CFG.PMS.Set(powerSetupValue=2).serialize())
