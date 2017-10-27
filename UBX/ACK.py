@@ -16,13 +16,13 @@ class ACK:
         _id = 0x01
 
         class Fields:
-            clsID = U1(1)
-            msgID = U1(2)
+            clsID = U1(1)   # Class ID of the Acknowledged Message
+            msgID = U1(2)   # Message ID of the Acknowledged Message
 
     class NAK:
 
         _id = 0x00
 
         class Fields:
-            clsID = U1(1)
-            msgID = U1(2)
+            clsID = U1(1)   # Class ID of the Not-Acknowledged Message
+            msgID = U1(2)   # Message ID of the Not-Acknowledged Message
