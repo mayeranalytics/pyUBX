@@ -2,7 +2,7 @@
 
 from UBXMessage import UBXMessage, initMessageClass, addGet
 import struct
-from Types import U1, U2, U4, X4, U
+from Types import U1, U2, U4, X2, X4, U
 
 
 @initMessageClass
@@ -118,3 +118,20 @@ class CFG:
                     4: "Continuous Mode"    # for ver>=14 0 and 4 are the same
                     }
             )
+
+    @addGet
+    class PRT:
+        u"""§31.11.22.4 Port Configuration."""
+
+        _id = 0x00
+
+        class Fields:
+            portID      = U1(1)
+            reserved1   = U1(2)
+            txReady     = X2(3)
+            mode        = X4(4)
+            reserved2   = U4(5)
+            inProtoMask = X2(6)
+            outProtoMask= X2(7)
+            flags       = X2(8)
+            reserved3   = U2(9)
