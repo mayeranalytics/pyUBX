@@ -55,67 +55,67 @@ def stringFromByteString(bs):
 class U1:
     """UBX Unsigned Char."""
     fmt = "B"
-    def ctype(): return "uint8_t"
+    ctype = "uint8_t"
 
 @_InitGenericType
 class I1:
     """UBX Signed Char."""
     fmt = "b"
-    def ctype(): return "int8_t"
+    ctype = "int8_t"
 
 @_InitGenericType
 class X1:
     """UBX 1-byte bitfield."""
     fmt = "B"
-    def ctype(): return "uint8_t"
+    ctype = "uint8_t"
 
 @_InitGenericType
 class U2:
     """UBX Unsigned Short."""
     fmt = "H"
-    def ctype(): return "uint16_t"
+    ctype = "uint16_t"
 
 @_InitGenericType
 class I2:
     """UBX Signed Short."""
     fmt = "h"
-    def ctype(): return "int16_t"
+    ctype = "int16_t"
 
 @_InitGenericType
 class X2:
     """UBX 2-byte bitfield."""
     fmt = "H"
-    def ctype(): return "uint16_t"
+    ctype = "uint16_t"
 
 @_InitGenericType
 class U4:
     """UBX Unsigned Int."""
     fmt = "I"
-    def ctype(): return "uint32_t"
+    ctype = "uint32_t"
 
 @_InitGenericType
 class I4:
     """UBX Signed Int."""
     fmt = "i"
-    def ctype(): return "int32_t"
+    ctype = "int32_t"
 
 @_InitGenericType
 class X4:
     """UBX 4-byte bitfield."""
     fmt = "I"
-    def ctype(): return "uint32_t"
+    ctype = "uint32_t"
 
 @_InitGenericType
 class R4:
     """UBX single precision float."""
     fmt = "f"
-    def ctype(): return "float"
+    ctype = "float"
 
 @_InitGenericType
 class R8:
     """UBX double precision float."""
     fmt = "d"
-    def ctype(): return "double"
+    ctype = "double"
 
 class CH:
     """ASCII / ISO 8859.1 Encoding."""
@@ -125,7 +125,7 @@ class CH:
         self.ord = _ord
         self._size = N
         self._nullTerminatedString = nullTerminatedString
-    def ctype(): return "char[{}]".format(self.N)
+        self.ctype = "char[{}]".format(self.N)
     def parse(self, msg):
         if len(msg) < self.N:
             err = "Message length {} is shorter than required {}"\
@@ -147,10 +147,10 @@ class CH:
 class U:
     """Variable-length array of unsigned chars."""
     fmt = None  # Not needed
-    def ctype(): return "uint8_t[{}]".format(self.N)
     def __init__(self, _ord, N, allowed=[]):
         self._ord = _ord
         self.N = N
+        self.ctype = "uint8_t[{}]".format(self.N)
     def parse(self, msg):
         if len(msg) < self.N:
             err = "Message length {} is shorter than required {}"\
