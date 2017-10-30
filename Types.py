@@ -148,7 +148,7 @@ class U:
     """Variable-length array of unsigned chars."""
     fmt = None  # Not needed
     def __init__(self, _ord, N, allowed=[]):
-        self._ord = _ord
+        self.ord = _ord
         self.N = N
         self.ctype = "uint8_t[{}]".format(self.N)
     def parse(self, msg):
