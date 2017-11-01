@@ -1,0 +1,6 @@
+[submodule "googletest"]
+	path = googletest
+	url = https://github.com/google/googletest.git
+[submodule "lang/cpp/test/googletest"]
+	path = lang/cpp/test/googletest
+	url = https://github.com/google/googletest.git
