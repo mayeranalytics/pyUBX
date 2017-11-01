@@ -12,6 +12,7 @@ class TEST:
 
     @addGet
     class TEST:
+        """to test"""
 
         _id = 0xFF
 
