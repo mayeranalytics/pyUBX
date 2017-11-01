@@ -1,0 +1,17 @@
+{
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "(lldb) Launch 'test'",
+                "type": "cppdbg",
+                "request": "launch",
+                "program": "${workspaceRoot}/test/bin/test",
+                "args": [],
+                "stopAtEntry": false,
+                "cwd": "${workspaceRoot}",
+                "environment": [],
+                "externalConsole": true,
+                "MIMode": "lldb"
+            }
+        ]
+    }
