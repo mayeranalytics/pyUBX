@@ -9,7 +9,7 @@ defined in [UBX-13003221 - R13, §31](https://www.u-blox.com/sites/default/files
 - interact with a device using a REPL
 - use as a parser generator for other languages or definition files for other parser generators
 
-**Only a small subset is currently implemented!** 
+**Note**: Currently only a small subset is implemented!
 
 #### UBX
 
@@ -17,7 +17,11 @@ defined in [UBX-13003221 - R13, §31](https://www.u-blox.com/sites/default/files
 
 - 9 message classes `UPD ` `MON ` `AID` `TIM` `ESF` `MGA` `LOG` `SEC` `HNR` , and
 - 155 individual messages, many of which have multiple versions
-- `Command` `Get` `Set` `Input` `Output` `Periodic` `Poll Request` `Polled` 
+- there are different types of messages: `Command` `Get` `Set` `Input` `Output` `Periodic` `Poll Request` `Polled` 
+
+#### UBX Message Hierarchy
+
+Messages are grouped in so-called *classes*. Each class is identified by a *class ID*. Within each class each message is identified by a *message ID*. In the message definitions in Section 39 of the documentation *class IDs* are titled *Class* and *message IDs* are, confusingly, titled *ID*. Here we stick to *class ID* and *message ID*.
 
 #### Message definitions
 
@@ -29,24 +33,30 @@ class ACK:
     """Message class ACK."""
     _class = 0x05
     
-    class ACK:		# this is message ACK-ACK
+    class ACK:
         _id = 0x01
         class Fields:
-            clsID = U1(1)
-            msgID = U1(2)
+            clsID = U1(1)   # Class ID of the Acknowledged Message
+            msgID = U1(2)   # Message ID of the Acknowledged Message
 
-    class NAK:		# this is message ACK-NAK
+    class NAK:
         _id = 0x00
         class Fields:
-            clsID = U1(1)
-            msgID = U1(2)
+            clsID = U1(1)   # Class ID of the Not-Acknowledged Message
+            msgID = U1(2)   # Message ID of the Not-Acknowledged Message
 ```
 
-The syntax is quite intuitive. UBX message class and message ID are defined by using member variables `_class` and `_id`. 
+The class structure mirrors the UBX message hierarchy. Python classes `UBX.ACK`, `UBX.CGF`, `UBX.MON` correspond to the respective messages classes. Python classes `UBX.ACK.ACK`,  `UBX.ACK.NAK`, etc., correspond to the respective messages.
 
-This design introduces some syntactic noise such as the frequent `class` keyword and the occasional decorator. It's an acceptable tradeoff: As it is correct Python it can therefore be used to parse and manipulate messages. 
+This design introduces some syntactic noise such as the frequent `class` keyword and abundant use of decorators. It is an acceptable tradeoff: As it is correct Python it can be used to parse and manipulate messages. For example, by introspection it becomes possible to use these UBX message definitions to generate parsers and generators for other languages, such as C/C++ (see [below](#cpp)). The decorators add the boilerplate and keep the syntax as simple as possible.
 
-It is also possible to use these UBX message definitions to generate parsers and generators for other languages, such as C/C++, etc, by using introspection.
+### Python class structure
+
+#### *Class ID* and *message ID*
+
+UBX *class ID* and *message ID* are defined by using member variables `_class` and `_id`. 
+
+#### Fields
 
 Note that the `Fields` class variables have to be numbered, otherwise the exact order of the variables cannot be recovered (Python stores the various `things' belonging to a class in a dict). So the first argument of a type is always an ordering number. The actual numbers don't matter as long as the resulting ordering is correct.
 
@@ -100,7 +110,12 @@ MON-VER
 - class **`ACK`**:
   - `ACK` `NAK` 
 - class **`CFG`**:
-  - `GNSS` `PM2` `PSM` `RATE` `RXM`
+  - `GNSS` : GNSS system channel sharing configuration
+  - `PSM` : Power mode setup
+  - `PM2`: Extended power management configuration
+  - `PRT`: Port configuration
+  - `RATE`: Navigation/Measurement rate settings
+  - `RXM`: RXM configuration
 - class **`MON`**:
   - `VER`
 
@@ -218,6 +233,12 @@ optional arguments:
 
 `UBX.py` uses finite state machines defined in `FSM.py`. The `Manager` class derives from `UBXManager` and overrides the `onUBX`, etc., callbacks.
 
+## Generate Language Bindinds with pyUBX
+
+### </a name="cpp">C++
+
+See [Lang C++](lang/cpp/readme.md)
+
 ## Protoyping with Python
 
 It is unusual to interface with a chip using Python. Usually this is done in C/C++ using a microcontroller, maybe an Arduino. 
@@ -244,10 +265,6 @@ For field tests single board computers (SBCs) can be used. Some draw less than 2
 - **[Beaglebone Black](https://beagleboard.org/black)**: Well equipped with on-board flash, 2 x SPI, 2 x I<sup>2</sup>C, 4 x UART, etc., but not so cheap (around 50$).
 - **[Pine64](https://www.pine64.org)**: Rather large and power hungry (300-800mA current draw), but cheap yet powerful with a quad-core A64 processor and [generous I/O](https://drive.google.com/file/d/0B0cEs0lxTtL3YU1CNmJ2bEIzTlE/view).
 - [**UDOO Neo**](https://www.udoo.org/docs-neo/Introduction/Introduction.html): i.MX 6SoloX-based with 3 x UART, 3 x I<sup>2</sup>C, but only 1 x SPI. The basic version is about 50$.
-
-#### Migration to C/C++, etc.
-
-@Todo
 
 #### Typical setup
 
@@ -285,7 +302,7 @@ U-blox own library called *libMGA* can be obtained, according to the [forum](htt
 
 ### pyUBX
 
-The `pyUBX` software is GPL 3.0 licensed. The software is provided "as-is". Use it carefully. If you brick your device it's your, and *only* your fault!!!
+The `pyUBX` software is GPL 3.0 licensed. The software is provided "as-is". Use it carefully or you might brick your device!!!
 
 ### u-blox
 
