@@ -70,7 +70,7 @@ public:
     stringstream ss;
 };
 
-TEST(Cpp, Serializer) {
+TEST(Cpp, SerializeUBX) {
     MySerializer serializer;
     serializer.serialize<ACK::ACK_>(NULL, 0);
     prettyPrint(serializer.ss.str());
