@@ -1,7 +1,7 @@
 LDFLAGS=-Lgoogletest/googlemock/gtest/ $(shell pkg-config --cflags --libs googletest/gtest.pc)
 CXXFLAGS=-g -I.. -Igoogletest/googletest/include
-TARGETS=bin/test bin/testParseNMEA
-DEP=../src/parseUBX.h ../src/parseNMEA.h ../src/UBX.h ../src/serializer.h ../src/deserializer.h
+TARGETS=bin/test bin/testParseNMEAPayload
+DEP=../src/parseUBXBase.h ../src/parseNMEAPayload.h ../src/UBX.h ../src/serializer.h ../src/parseUBX.h
 all: bin $(TARGETS)
 
 bin/%:%.cpp $(DEP) ../src/messages/MON.h ./prettyprint.h
@@ -9,7 +9,7 @@ bin/%:%.cpp $(DEP) ../src/messages/MON.h ./prettyprint.h
 
 test: $(TARGETS)
 	bin/test
-	bin/testParseNMEA
+	bin/testParseNMEAPayload
 
 bin:
 	mkdir bin
