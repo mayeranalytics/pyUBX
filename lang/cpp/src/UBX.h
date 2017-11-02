@@ -1,9 +1,9 @@
 // define the _iterator
 
-#include <stddef.h>
-
 #ifndef __UBX_H__
 #define __UBX_H__
+
+#include <stddef.h>
 
 template<class T>
 class _iterator {
