@@ -13,6 +13,10 @@
 class Deserializer : public ParseUBXBase
 {
 public:
+    /* Constructor */
+    Deserializer(char* const buf, const size_t BUFLEN) : ParseUBXBase(buf, BUFLEN) {};
+    
+    /* Callback */
     void onUBX(uint8_t cls, uint8_t id, size_t len, char buf[]) {
         switch(cls) {
         case 0x05: // Message class ACK

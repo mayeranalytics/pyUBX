@@ -83,7 +83,8 @@ TEST(Cpp, Serializer) {
 class MyDeserializer : public Deserializer
 {
 public:
-    MyDeserializer() { resetFlags(); }
+    MyDeserializer(char* const buf, const size_t BUFLEN) 
+    : Deserializer(buf, BUFLEN) { resetFlags(); }
     void resetFlags() {
         ACK_ACK_called = CFG_PMS_called = error = false;
     }
@@ -104,7 +105,9 @@ public:
 };
 
 TEST(Cpp, Deserializer) {
-    MyDeserializer deserializer;
+    const size_t BUFLEN=256;
+    char buf[BUFLEN];
+    MyDeserializer deserializer(buf, BUFLEN);
     // test ACK-ACK
     stringstream ack;
     ack << '\xb5'<<'\x62'<<'\x05'<<'\x01'<<'\x00'<<'\x00'<<'\x06'<<'\x17';

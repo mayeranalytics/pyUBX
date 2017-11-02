@@ -13,11 +13,11 @@
 class ParseNMEA
 {
 public:
-    static const size_t BUFLEN = 256;
-    char buf[BUFLEN];
+    const size_t BUFLEN = 256;
+    char* const buf;
     
     /* Constructor. */
-    ParseNMEA() : state(START) {};
+    ParseNMEA(char* const buf, const size_t BUFLEN) : BUFLEN(BUFLEN), buf(buf), state(START) {};
     
     /* Parse one new byte. */
     bool parse(uint8_t);

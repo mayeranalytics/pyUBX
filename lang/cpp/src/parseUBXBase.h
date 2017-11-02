@@ -15,12 +15,12 @@
 class ParseUBXBase
 {
 public:
-    static const size_t BUFLEN = 256;
-    char buf[BUFLEN];
+    const size_t BUFLEN;
+    char* const buf;
 
     /* Constructor.
      */
-    ParseUBXBase() : state(START) {};
+    ParseUBXBase(char* const buf, const size_t BUFLEN) : BUFLEN(BUFLEN), buf(buf), state(START) {};
 
     /* Parse one byte */
     bool parse(uint8_t);
