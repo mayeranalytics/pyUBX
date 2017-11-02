@@ -1,7 +1,7 @@
 #include <iostream>
 #include "../src/messages/MON.h"
 #include "../src/parseUBX.h"
-#include "../src/serializer.h"
+#include "../src/serializeUBX.h"
 #include "prettyprint.h"
 #include "gtest/gtest.h"
 #include <string>
@@ -61,7 +61,7 @@ TEST(Cpp, MON_VER_write) {
 }
 
 /* For testing purposes serialize to stringstream */
-class MySerializer : public Serializer
+class MySerializer : public SerializeUBX
 {
 public:
     void writeByte(uint8_t byte) {
