@@ -167,6 +167,8 @@ if __name__ == '__main__':
     file.write("{\n")
     file.write("public:\n")
     file.write("    ParseUBX(char* const buf, const size_t BUFLEN) : ParseUBXBase(buf, BUFLEN) {};\n")
+    file.write("\n")
+    file.write("private:\n")
     file.write("    void onUBX(uint8_t cls, uint8_t id, size_t len, char buf[]) {\n")
     file.write("        switch(cls) {\n")
     for Cls in getClassesInModule(UBX):
@@ -191,6 +193,7 @@ if __name__ == '__main__':
     file.write("        }\n")
     file.write("    }\n")
     file.write("\n")
+    file.write("public:\n")
     for fName, className, messageName in fNames:
         file.write("    /* callback for {}::{} messages */\n".format(className, messageName))
         file.write("    virtual void {}({}::{}& msg) {{}}\n".format(fName, className, messageName))
