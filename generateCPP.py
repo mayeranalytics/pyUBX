@@ -195,6 +195,8 @@ if __name__ == '__main__':
         file.write("    /* callback for {}::{} messages */\n".format(className, messageName))
         file.write("    virtual void {}({}::{}& msg) {{}}\n".format(fName, className, messageName))
         file.write("    \n")
+    file.write("private:\n")
+    file.write("    ParseUBX();\n")
     file.write("};\n")
     file.write("\n")
     file.write("#endif // #define {}\n".format(ifndefName))
