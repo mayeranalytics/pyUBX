@@ -1,7 +1,7 @@
-#include <stddef.h>
-
 #ifndef __SERIALIZEUBX_H__
 #define __SERIALIZEUBX_H__
+
+#include <stddef.h>
 
 class SerializeUBX
 {

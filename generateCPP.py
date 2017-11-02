@@ -67,7 +67,7 @@ def makeMessageStruct(file, className, Message, indent=4):
     fullClassName = "{}::{}".format(className, messageName)
     if Message.__doc__ is not None:
         file.write(makeComment(Message.__doc__))
-    file.write("struct {} : public Payload\n".format(fullClassName))
+    file.write("struct {}\n".format(fullClassName))
     file.write("{\n")
     _id = Message._id
     _class = Message._class
@@ -154,6 +154,8 @@ if __name__ == '__main__':
     ifndefName = "__DESERIALIZER_H__"
     file.write("#ifndef {}\n".format(ifndefName))
     file.write("#define {}\n".format(ifndefName))
+    file.write("\n")
+    file.write("#include \"../src/parseUBXBase.h\"")
     file.write("\n")
     # include all files
     for Cls in getClassesInModule(UBX):

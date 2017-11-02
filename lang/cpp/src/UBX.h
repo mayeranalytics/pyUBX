@@ -1,13 +1,9 @@
 // define the _iterator
 
 #include <stddef.h>
-#include "parseUBXBase.h"
 
 #ifndef __UBX_H__
 #define __UBX_H__
-
-struct Payload {
-};
 
 template<class T>
 class _iterator {
