@@ -80,11 +80,11 @@ TEST(Cpp, Serializer) {
 }
 
 /* For testing purposes serialize to stringstream */
-class MyDeserializer : public Deserializer
+class MyParseUBX : public ParseUBX
 {
 public:
-    MyDeserializer(char* const buf, const size_t BUFLEN) 
-    : Deserializer(buf, BUFLEN) { resetFlags(); }
+    MyParseUBX(char* const buf, const size_t BUFLEN) 
+    : ParseUBX(buf, BUFLEN) { resetFlags(); }
     void resetFlags() {
         ACK_ACK_called = CFG_PMS_called = error = false;
     }
@@ -104,10 +104,10 @@ public:
 
 };
 
-TEST(Cpp, Deserializer) {
+TEST(Cpp, ParseUBX) {
     const size_t BUFLEN=256;
     char buf[BUFLEN];
-    MyDeserializer deserializer(buf, BUFLEN);
+    MyParseUBX deserializer(buf, BUFLEN);
     // test ACK-ACK
     stringstream ack;
     ack << '\xb5'<<'\x62'<<'\x05'<<'\x01'<<'\x00'<<'\x00'<<'\x06'<<'\x17';

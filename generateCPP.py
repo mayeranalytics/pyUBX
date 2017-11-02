@@ -151,7 +151,7 @@ if __name__ == '__main__':
         )
     file.write("// See https://github.com/mayeranalytics/pyUBX\n")
     # ifndef
-    ifndefName = "__DESERIALIZER_H__"
+    ifndefName = "__PARSEUBX_H__"
     file.write("#ifndef {}\n".format(ifndefName))
     file.write("#define {}\n".format(ifndefName))
     file.write("\n")
@@ -162,10 +162,11 @@ if __name__ == '__main__':
         className = fixClassName(getClassName(Cls)).replace("UBX.", "")
         file.write("#include \"messages/{}.h\"\n".format(className))
     file.write("\n")
-    # Deserializer class
-    file.write("class Deserializer : public ParseUBXBase\n")
+    # ParseUBX class
+    file.write("class ParseUBX : public ParseUBXBase\n")
     file.write("{\n")
     file.write("public:\n")
+    file.write("    ParseUBX(char* const buf, const size_t BUFLEN) : ParseUBXBase(buf, BUFLEN) {};\n")
     file.write("    void onUBX(uint8_t cls, uint8_t id, size_t len, char buf[]) {\n")
     file.write("        switch(cls) {\n")
     for Cls in getClassesInModule(UBX):

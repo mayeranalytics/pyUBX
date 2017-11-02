@@ -13,7 +13,7 @@
 class ParseNMEA
 {
 public:
-    const size_t BUFLEN = 256;
+    const size_t BUFLEN;
     char* const buf;
     
     /* Constructor. */
