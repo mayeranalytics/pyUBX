@@ -161,7 +161,7 @@ if __name__ == '__main__':
         file.write("#include \"messages/{}.h\"\n".format(className))
     file.write("\n")
     # Deserializer class
-    file.write("class Deserializer : public ParseUBX\n")
+    file.write("class Deserializer : public ParseUBXBase\n")
     file.write("{\n")
     file.write("public:\n")
     file.write("    void onUBX(uint8_t cls, uint8_t id, size_t len, char buf[]) {\n")
