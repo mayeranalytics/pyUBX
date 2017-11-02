@@ -8,6 +8,7 @@ using namespace std;
 class MyParser : public ParseNMEAPayload 
 {
 public:
+    MyParser() { resetFlags(); }
     void onGGA(
         uint32_t utc, 
         float    lat, 
@@ -20,7 +21,7 @@ public:
     ) {
         GGAgood = true;
     }
-    bool GGAgood = false;
+    bool GGAgood;
     void resetFlags() {
         GGAgood = false;
     }
@@ -96,6 +97,7 @@ TEST(ParseNMEAPayload, testGGA_full_1)
 {
     class MyParser : public ParseNMEAPayload {
     public:
+        MyParser() : GGAcalled(false) {};
         void onGGA(uint32_t utc, float lat, float lon, uint8_t qual, uint8_t n_satellites, float hdil, float alt, float height)
         {
             GGAcalled = true;
@@ -108,7 +110,7 @@ TEST(ParseNMEAPayload, testGGA_full_1)
             ASSERT_TRUE(fabsf(alt - 499.6f) < 1e-5f);
             ASSERT_TRUE(fabsf(height- 48.0f) < 1e-5f);
         }
-        bool GGAcalled = false;
+        bool GGAcalled;
     };
     MyParser parser;
     char input[] = "GPGGA,092725.00,4717.11399,N,00833.91590,E,1,08,1.01,499.6,M,48.0,M,,";
@@ -120,6 +122,7 @@ TEST(ParseNMEAPayload, testGGA_full_2)
 {
     class MyParser : public ParseNMEAPayload {
     public:
+        MyParser() : GGAcalled(false) {}
         void onGGA(uint32_t utc, float lat, float lon, uint8_t qual, uint8_t n_satellites, float hdil, float alt, float height)
         {
             GGAcalled = true;
@@ -132,7 +135,7 @@ TEST(ParseNMEAPayload, testGGA_full_2)
             ASSERT_TRUE(fabsf(alt - 0.f) < 1e-5f);
             ASSERT_TRUE(fabsf(height- 0.f) < 1e-5f);
         }
-        bool GGAcalled = false;
+        bool GGAcalled;
     };
     MyParser parser;
     char input[] = "GNGGA,054242.00,,,,,0,00,99.99,,,,,,";
