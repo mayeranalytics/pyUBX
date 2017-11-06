@@ -7,7 +7,8 @@ defined in [UBX-13003221 - R13, §31](https://www.u-blox.com/sites/default/files
 - message definitions are simple, uncluttered Python code (class definitions)
 - decorators keep the boilerplate code at a minimum
 - interact with a device using a REPL
-- use as a parser generator for other languages or definition files for other parser generators
+- use as a parser generator for other languages or definition files for other parser generators, implemented are:
+  -  [C++](#C++)
 
 **Note**: Currently only a small subset is implemented!
 
@@ -48,7 +49,7 @@ class ACK:
 
 The class structure mirrors the UBX message hierarchy. Python classes `UBX.ACK`, `UBX.CGF`, `UBX.MON` correspond to the respective messages classes. Python classes `UBX.ACK.ACK`,  `UBX.ACK.NAK`, etc., correspond to the respective messages.
 
-This design introduces some syntactic noise such as the frequent `class` keyword and abundant use of decorators. It is an acceptable tradeoff: As it is correct Python it can be used to parse and manipulate messages. For example, by introspection it becomes possible to use these UBX message definitions to generate parsers and generators for other languages, such as C/C++ (see [below](#cpp)). The decorators add the boilerplate and keep the syntax as simple as possible.
+This design introduces some syntactic noise such as the frequent `class` keyword and abundant use of decorators. It is an acceptable tradeoff: As it is correct Python it can be used to parse and manipulate messages. For example, by introspection it becomes possible to use these UBX message definitions to generate parsers and generators for other languages, such as C/C++ (see [below](#C++)). The decorators add the boilerplate and keep the syntax as simple as possible.
 
 ### Python class structure
 
@@ -235,7 +236,7 @@ optional arguments:
 
 ## Generate Language Bindinds with pyUBX
 
-### </a name="cpp">C++
+### C++
 
 See [Lang C++](lang/cpp/readme.md)
 
