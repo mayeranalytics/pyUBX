@@ -41,9 +41,12 @@ public:
 
     virtual ~ParseUBXBase() {};
 
-private:
     enum STATE {START, UBX_SYNC_CHAR_2, UBX_CLASS, UBX_ID, UBX_LEN_1, UBX_LEN_2,
-                UBX_PAYLOAD, UBX_CK_A, UBX_CK_B};
+        UBX_PAYLOAD, UBX_CK_A, UBX_CK_B};
+
+    STATE getState() const { return state; }
+
+private:
     STATE state;
     size_t buf_pos;     // current position in buf
     // UBX state variables and functions

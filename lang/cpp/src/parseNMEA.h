@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <cassert>
 
+
 /* Parse NMEA messages.
  *
  * Call parse(uint8_t) on each new byte. On a correct NMEA message the function onNMEA will be 
@@ -17,7 +18,8 @@ public:
     char* const buf;
     
     /* Constructor. */
-    ParseNMEA(char* const buf, const size_t BUFLEN) : BUFLEN(BUFLEN), buf(buf), state(START) {};
+    ParseNMEA(char* const buf, const size_t BUFLEN)
+     : BUFLEN(BUFLEN), buf(buf), state(START), buf_pos(0) {};
     
     /* Parse one new byte. */
     bool parse(uint8_t);
@@ -35,8 +37,14 @@ public:
     virtual void onNMEAerr() {};
         
     virtual ~ParseNMEA() {};
-private:
+
     enum STATE {START, NMEA, NMEA_CKSUM_1, NMEA_CKSUM_2};
+
+    /* Return state */
+    STATE getState() const { return state; }
+        
+private:
+    ParseNMEA();
     STATE state;
     size_t buf_pos;     // current position in buf
     // NMEA state variables and functions
@@ -49,8 +57,17 @@ protected:
 
 
 bool
-ParseNMEA::parse(uint8_t c) 
+ParseNMEA::parse(uint8_t c)
 {
+    if(buf_pos >= BUFLEN) {
+        #ifdef DEBUG
+        printf("ParseNMEA::BUFLEN exceeded while parsing NMEA message\n");
+        #endif
+        state = START;
+        onNMEAerr();
+        return false;
+    } 
+    
     uint8_t i;
     switch(state) {
     case START:
@@ -60,31 +77,23 @@ ParseNMEA::parse(uint8_t c)
             NMEA_cksum_calculated = 0;
         }
         break;
-
-    /************************ NMEA message parsing *****************************/
-
     case NMEA:
         if(c == '*')
             state = NMEA_CKSUM_1;
         else {
-            if(buf_pos >= BUFLEN) {
-                #ifdef DEBUG
-                printf("ParseNMEA::BUFLEN exceeded while parsing NMEA message\n");
-                #endif
-                onNMEAerr();
-                state = START;
-                return false;
-            } else {
-                buf[buf_pos++] = c;
-                NMEA_cksum_calculated ^= c; // update cksum
-            }
+            //printf("-%ld\n", buf_pos);
+            buf[buf_pos++] = c;
+            NMEA_cksum_calculated ^= c; // update cksum
         }
         break;
     case NMEA_CKSUM_1:
         i = hexToInt(c);
-        if(i == 0xff)
+        if(i == 0xff) {
             state = START;
-        else {
+            #ifdef DEBUG
+            printf("%c in NMEA cksum is not hex\n", c);
+            #endif
+        } else {
             NMEA_cksum_in_message = 16 * i;
             state = NMEA_CKSUM_2;
         }
@@ -103,6 +112,10 @@ ParseNMEA::parse(uint8_t c)
                 buf[buf_pos] = 0;   // make a null terminated string
                 onNMEAerr();
             }
+        } else {
+            #ifdef DEBUG
+            printf("%c in NMEA cksum is not hex\n", c);
+            #endif
         }
         state = START;
         break;

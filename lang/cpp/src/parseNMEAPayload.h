@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 
 /* Parse NMEA payloads.
@@ -102,7 +103,7 @@ uint32_t parseUTC(char s[])
 void 
 ParseNMEAPayload::parse(char buf[], size_t len)
 {
-    const size_t MAX_N_WORDS = 15;
+    const size_t MAX_N_WORDS = 20;
     char* words[MAX_N_WORDS];
     size_t n_word = 0;
     if(len == 0) { 
@@ -113,8 +114,9 @@ ParseNMEAPayload::parse(char buf[], size_t len)
         return;
     }
     words[n_word++] = buf;
-    for(size_t i=0; i<len; i++) {
-        if(n_word > MAX_N_WORDS) {
+    size_t i;
+    for(i=0; i<len && buf[i]!='\0'; i++) {
+        if(n_word >= MAX_N_WORDS) {
             #ifdef DEBUG
             printf("ParseNMEAPayload error: Too many words\n");
             #endif
