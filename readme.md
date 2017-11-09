@@ -257,7 +257,7 @@ optional arguments:
 
 ### C++
 
-See [Lang C++](lang/cpp/readme.md)
+See [Lang C++](lang/cpp/readme.md), also separately published as [https://github.com/mayeranalytics/pyUBX-Cpp](https://github.com/mayeranalytics/pyUBX-Cpp).
 
 ## Protoyping with Python
 
@@ -283,12 +283,12 @@ For field tests single board computers (SBCs) can be used. Some draw less than 2
 
 - **[C.H.I.P](http://getchip.com)**: Very cheap, with on-board flash, and with slightly more I/O than the Raspberry
 - **[Beaglebone Black](https://beagleboard.org/black)**: Well equipped with on-board flash, 2 x SPI, 2 x I<sup>2</sup>C, 4 x UART, etc., but not so cheap (around 50$).
-- **[Pine64](https://www.pine64.org)**: Rather large and power hungry (300-800mA current draw), but cheap yet powerful with a quad-core A64 processor and [generous I/O](https://drive.google.com/file/d/0B0cEs0lxTtL3YU1CNmJ2bEIzTlE/view).
+- **[Pine64](https://www.pine64.org)**: Rather large and power hungry (300-800mA current draw), but cheap yet powerful with an Allwinner R18 quad-core A64 processor and [generous I/O](https://drive.google.com/file/d/0B0cEs0lxTtL3YU1CNmJ2bEIzTlE/view).
 - [**UDOO Neo**](https://www.udoo.org/docs-neo/Introduction/Introduction.html): i.MX 6SoloX-based with 3 x UART, 3 x I<sup>2</sup>C, but only 1 x SPI. The basic version is about 50$.
 
 #### Typical setup
 
-Here's what we used for testing:
+For testing we used:
 
 - SBC: Raspberry Pi
 - GNSS: CAM-M8Q module on carrier board (80x40mm ground plane), connected via UART
@@ -308,7 +308,7 @@ The UBX protocol takes up about 220 pages of the *Receiver Description*, so is r
 
 ### Kaitai
 
-[Kaitai](http://kaitai.io) is a parser generator for binary structures. It looks very promising and would have been a great fit. Unfortunately, Kaitai can only create parsers but not writers (serializers). We'll look again at Kaitai when this limitation is lifted. Since the `pyUBX` message definition is written in Python it shouldn't be difficult to generate the necessay `.ksy` yaml files automatically.
+[Kaitai](http://kaitai.io) is a parser generator for binary structures. It looks very promising and would have been a great fit. Unfortunately, Kaitai can only create parsers but not generators (serializers). We'll look again at Kaitai when this limitation is lifted. Since the `pyUBX` message definitions are written in Python it shouldn't be difficult to quickly generate the necessay `.ksy` yaml at a later stage.
 
 ### arobenko/ublox
 
