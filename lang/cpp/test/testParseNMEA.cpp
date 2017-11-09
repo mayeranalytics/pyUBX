@@ -68,6 +68,8 @@ TEST(ParseNMEA, testParseUTC)
     ASSERT_EQ(parseUTC(input2), 4320000+1);
     char input3[] = "010203.04";
     ASSERT_EQ(parseUTC(input3), 372304);
+    char input4[] = "010203.05";
+    ASSERT_EQ(parseUTC(input4), 372305);
 }
 
 TEST(ParseNMEA, testGGA_shallow)

@@ -44,7 +44,7 @@ public:
 
 /* Parse a lat/lon string as given in NMEA messages.
  *
- * Returns a float
+ * Returns a float. 9999 identifies an error.
  */
 float parseLatLon(const char s[], const char nsew[]);
 
@@ -55,6 +55,9 @@ uint32_t parseUTC(char s[]);
 float
 parseLatLon(const char _s[], const char nsew[])
 {
+    // returns 9999 on error
+    if(_s[0] == '\0' or nsew[0] == '\0')
+        return 9999;
     char* s = const_cast<char*>(_s);    // it is actually const (strings are modified then repaired)
     float lat_lon;
     size_t i;
@@ -87,6 +90,7 @@ parseLatLon(const char _s[], const char nsew[])
 
 uint32_t parseUTC(char s[])
 {   
+    // assumes a format. I.e. there must be a string at s of length 9. No sanity checking is performed!
     // hhmmss.ss 
     // 012345678
     uint32_t hundreths = (s[7]-48)*10+(s[8]-48);
@@ -143,7 +147,7 @@ ParseNMEA::parse(char buf[], size_t len)
             #endif
             return;
         }
-        uint32_t utc = parseUTC(words[1]);
+        uint32_t utc = words[1][0] != '\0' ? parseUTC(words[1]) : 0;
         float lat = parseLatLon(words[2], words[3]);
         float lon = parseLatLon(words[4], words[5]);   
         uint8_t qual = words[6][0]-48;  // one digit 0..9
