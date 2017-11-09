@@ -1,8 +1,8 @@
 all:
-	make -C test
+	make -j -C test
 
 test:
-	make -C test test
+	make -j -C test test
 
 clean:
 	make -C test clean
