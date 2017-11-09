@@ -154,7 +154,7 @@ if __name__ == '__main__':
     file.write("// DO NOT MODIFY THIS FILE!\n")
     # ifndef
     ifndefName = "__PARSEUBX_H__"
-    file.write("#ifndef {}\n".format(ifndefName))
+    file.write("\n#ifndef {}\n".format(ifndefName))
     file.write("#define {}\n".format(ifndefName))
     file.write("\n")
     file.write("#include \"../src/parseUBXBase.h\"")
