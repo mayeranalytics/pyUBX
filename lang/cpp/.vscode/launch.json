@@ -5,7 +5,7 @@
                 "name": "(lldb) Launch 'test'",
                 "type": "cppdbg",
                 "request": "launch",
-                "program": "${workspaceRoot}/test/bin/testParseNMEAPayload",
+                "program": "${workspaceRoot}/test/bin/testParseNMEA",
                 "args": [],
                 "stopAtEntry": false,
                 "cwd": "${workspaceRoot}",
