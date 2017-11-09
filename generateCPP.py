@@ -150,6 +150,7 @@ if __name__ == '__main__':
         datetime.datetime.now().isoformat())
         )
     file.write("// See https://github.com/mayeranalytics/pyUBX\n")
+    file.write("// DO NOT MODIFY THIS FILE!\n")
     # ifndef
     ifndefName = "__PARSEUBX_H__"
     file.write("#ifndef {}\n".format(ifndefName))
