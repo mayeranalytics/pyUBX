@@ -1,5 +1,7 @@
 # Lang C++
 
+TODO: What is this...
+
 It is easiest to look at an example. 
 
 ```cpp
@@ -172,13 +174,7 @@ Todo: Derive ParseNMEA from ParseNMEABase and Parse from ParseNMEA.
 
 ## Testing
 
-### Google `gtest`
-
-Add submodule:
-
-```bash
-git submodule add https://github.com/google/googletest.git
-```
+### Googletest
 
 Build googletest
 ```bash
