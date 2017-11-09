@@ -114,6 +114,7 @@ if __name__ == '__main__':
             datetime.datetime.now().isoformat())
             )
         file.write("// See https://github.com/mayeranalytics/pyUBX\n")
+        file.write("// DO NOT MODIFY THIS FILE!\n")
         ifndefName = "__"+className.upper()+"_H__"
         file.write("\n#ifndef {}\n".format(ifndefName));
         file.write("#define {}\n".format(ifndefName));
