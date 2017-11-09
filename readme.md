@@ -12,7 +12,26 @@ defined in [UBX-13003221 - R13, §31](https://www.u-blox.com/sites/default/files
 
 **Note**: Currently only a subset of all UBX messages is implemented. See the [progress status](#progress-status) below.
 
-#### UBX
+#### Cloning
+
+The C++ parser/generator depends on [googletest](https://github.com/google/googletest). If you want to run the C++ tests then check out the repo using the `—recursive` option and build googletest:
+
+```bash
+# clone into ./pyUBX
+git clone --recursive https://github.com/mayeranalytics/pyUBX.git 
+cd pyUBX
+# build googletest
+pushd lang/cpp/test/googletest
+cmake .
+make -j
+popd
+# run tests
+pushd lang/cpp
+make test
+popd
+```
+
+#### The UBX protocol
 
 `UBX` is a "*u-blox proprietary protocol to communicate with a host computer*". There are
 
