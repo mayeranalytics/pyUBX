@@ -8,9 +8,9 @@ defined in [UBX-13003221 - R13, §31](https://www.u-blox.com/sites/default/files
 - decorators keep the boilerplate code at a minimum
 - interact with a device using a REPL
 - use as a parser generator for other languages or definition files for other parser generators, implemented are:
-  -  [C++](#C++)
+  - [C++](lang/cpp/readme.md)
 
-**Note**: Currently only a small subset is implemented!
+**Note**: Currently only a subset of all UBX messages is implemented. See the [progress status](#progress-status) below.
 
 #### UBX
 
@@ -106,7 +106,7 @@ MON-VER
 
 (This is from a CAM-M8Q module.)
 
-## What's implemented
+## Progress status
 
 - class **`ACK`**:
   - `ACK` `NAK` 

@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
-#include "../src/parseNMEAPayload.h"
+#include "../src/parseNMEA.h"
 #include <string>
 #include <cmath>
 
 using namespace std;
 
-class MyParser : public ParseNMEAPayload 
+class MyParser : public ParseNMEA 
 {
 public:
     MyParser() { resetFlags(); }
@@ -27,7 +27,7 @@ public:
     }
 };
 
-TEST(ParseNMEAPayload, parseLatLon)
+TEST(ParseNMEA, parseLatLon)
 {
     struct ParseLatLonInput {
         ParseLatLonInput(string ParseLatLoninput, string nsew, float lat_lon) 
@@ -60,7 +60,7 @@ TEST(ParseNMEAPayload, parseLatLon)
     }
 }
 
-TEST(ParseNMEAPayload, testParseUTC)
+TEST(ParseNMEA, testParseUTC)
 {
     char input1[] = "120000.00";
     ASSERT_EQ(parseUTC(input1), 4320000);
@@ -70,7 +70,7 @@ TEST(ParseNMEAPayload, testParseUTC)
     ASSERT_EQ(parseUTC(input3), 372304);
 }
 
-TEST(ParseNMEAPayload, testGGA_shallow)
+TEST(ParseNMEA, testGGA_shallow)
 {
     char ParseLatLoninput1[] = "GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,";
     char ParseLatLoninput2[] = "GPGGA,172814.0,3723.46587704,N,12202.26957864,W,2,6,1.2,18.893,M,-25.669,M,2.0,0031";
@@ -93,9 +93,9 @@ TEST(ParseNMEAPayload, testGGA_shallow)
     }
 }
 
-TEST(ParseNMEAPayload, testGGA_full_1)
+TEST(ParseNMEA, testGGA_full_1)
 {
-    class MyParser : public ParseNMEAPayload {
+    class MyParser : public ParseNMEA {
     public:
         MyParser() : GGAcalled(false) {};
         void onGGA(uint32_t utc, float lat, float lon, uint8_t qual, uint8_t n_satellites, float hdil, float alt, float height)
@@ -118,9 +118,9 @@ TEST(ParseNMEAPayload, testGGA_full_1)
     ASSERT_TRUE(parser.GGAcalled);
 }  
 
-TEST(ParseNMEAPayload, testGGA_full_2)
+TEST(ParseNMEA, testGGA_full_2)
 {
-    class MyParser : public ParseNMEAPayload {
+    class MyParser : public ParseNMEA {
     public:
         MyParser() : GGAcalled(false) {}
         void onGGA(uint32_t utc, float lat, float lon, uint8_t qual, uint8_t n_satellites, float hdil, float alt, float height)

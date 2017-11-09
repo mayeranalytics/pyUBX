@@ -25,7 +25,7 @@ public:
     /* Parse one byte */
     bool parse(uint8_t);
 
-    /* NMEA callback
+    /* UBX callback
      *
      * buf is guaranteed to be a null-terminated string.
      */

@@ -2,20 +2,20 @@
 #define __PARSE_H__
 
 #include "parseNMEA.h"
-#include "parseNMEAPayload.h"
+#include "parseNMEABase.h"
 #include "parseUBX.h"
 
 
-class Parse : public ParseUBX , public ParseNMEA, public ParseNMEAPayload
+class Parse : public ParseUBX , public ParseNMEA, public ParseNMEABase
 {
 public:
     Parse(char* const buf, const size_t BUFLEN)
-    : state(START), ParseUBX(buf, BUFLEN), ParseNMEA(buf, BUFLEN) {};
+    : state(START), ParseUBX(buf, BUFLEN), ParseNMEABase(buf, BUFLEN) {};
     bool parse(uint8_t);
 
 private:
     void onNMEA(char buf[], size_t len) {
-        ParseNMEAPayload::parse(ParseNMEA::buf, ParseNMEA::BUFLEN);
+        ParseNMEA::parse(ParseNMEABase::buf, ParseNMEABase::BUFLEN);
     }
     enum STATE { START, UBX, NMEA } state;
     Parse();
@@ -29,7 +29,7 @@ Parse::parse(uint8_t c) {
     case START:
         if(c == '$') { 
             state = NMEA;
-            return ParseNMEA::parse(c);
+            return ParseNMEABase::parse(c);
         }
         else if(c==0xb5) {
             state = UBX;
@@ -37,8 +37,8 @@ Parse::parse(uint8_t c) {
         }
         break;
     case NMEA:
-        retval = ParseNMEA::parse(c);
-        if(ParseNMEA::getState() == ParseNMEA::START)
+        retval = ParseNMEABase::parse(c);
+        if(ParseNMEABase::getState() == ParseNMEABase::START)
             state = START;
         return retval;
         break;
