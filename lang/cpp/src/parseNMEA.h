@@ -48,7 +48,9 @@ public:
  */
 float parseLatLon(const char s[], const char nsew[]);
 
-/* Parse a UTC timestamp hhmmss.ss 
+/* Parse a UTC timestamp hhmmss.ss. No sanity checking is performed.
+ *
+ * Returns hundreths of seconds since 00:00:00.
  */
 uint32_t parseUTC(char s[]);
 
@@ -67,13 +69,13 @@ parseLatLon(const char _s[], const char nsew[])
             if(i==4) { // format xxmm
                 char bkup = s[2];
                 s[2] = 0;
-                lat_lon=float(atoi(s));
+                lat_lon = float(atoi(s));
                 s[2] = bkup;
                 lat_lon += strtod(s+2, NULL) / 60.0f;
             } else if(i==5) { // format xxxmm
                 char bkup = s[3];
                 s[3] = 0;
-                lat_lon=float(atoi(s));
+                lat_lon = float(atoi(s));
                 s[3] = bkup;
                 lat_lon += strtod(s+3, NULL) / 60.0f;
             } else {
