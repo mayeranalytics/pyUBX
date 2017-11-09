@@ -41,13 +41,11 @@ Parse::parse(uint8_t c) {
         if(ParseNMEABase::getState() == ParseNMEABase::START)
             state = START;
         return retval;
-        break;
     case UBX:
         retval = ParseUBX::parse(c);
         if(ParseUBX::getState() == ParseUBX::START)
             state = START;
         return retval;
-    break;
     default:
         assert(false);  // this shouldn't happen
         return false;
