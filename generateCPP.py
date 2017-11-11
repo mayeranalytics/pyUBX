@@ -182,6 +182,9 @@ if __name__ == '__main__':
         file.write("        case 0x{:02X}: // Message class {}\n".format(Cls._class, className))
         file.write("            switch(id) {\n")
         for messageName, Message in getClassMembers(Cls, inspect.isclass):
+            if messageName.find("_GET") >= 0:
+                print("Don't generate case statement for {}".format(messageName))
+                continue
             if messageName == className:
                 messageName = messageName + "_"
             fName = "on{}_{}".format(className, messageName)

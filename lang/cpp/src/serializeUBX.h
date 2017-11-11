@@ -7,10 +7,22 @@ class SerializeUBX
 {
 public:
     virtual void writeByte(uint8_t byte) = 0;
+    /* Serialize message T
+     */
     template<class T>
     void serialize(uint8_t* data, uint16_t len) {
         _serialize(data, len, T::classID, T::messageID);
     }
+    /* Serialize message T with zero length payload
+     */
+    template<class T>
+    void serialize() {
+        _serialize(NULL, 0, T::classID, T::messageID);
+    }
+    /* Serialize Get message (zero length payload message) corresponding to message T
+     */
+    template<class T>
+    void serializeGet() { serialize<T>(); }
 private:
     struct CkSum {
     public:
@@ -24,6 +36,8 @@ private:
         }
         uint8_t ck_A, ck_B;
     };
+    /* Serialize payload at data, length len, with classID and messageID.
+     */
     void _serialize(uint8_t* data, uint16_t len, uint8_t classID, uint8_t messageID)
     {
         CkSum ckSum;
@@ -40,5 +54,10 @@ private:
         writeByte(ckSum.ck_B);
     }
 };
+
+template<class T>
+size_t makeGet(char* buf, const size_t BUFLEN) {
+
+}
 
 #endif // #define __SERIALIZEUBX_H__

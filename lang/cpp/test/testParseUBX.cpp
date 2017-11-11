@@ -79,6 +79,15 @@ TEST(Cpp, SerializeUBX) {
     ASSERT_EQ(result.str(), serializer.ss.str());
 }
 
+TEST(Cpp, SerializeGetUBX) {
+    MySerializer serializer;
+    serializer.serializeGet<MON::VER>();
+    prettyPrint(serializer.ss.str());
+    stringstream result;
+    result << '\xb5'<<'\x62'<<'\x0a'<<'\x04'<<'\x00'<<'\x00'<<'\x0e'<<'\x34';
+    ASSERT_EQ(result.str(), serializer.ss.str());
+}
+
 /* For testing purposes serialize to stringstream */
 class MyParseUBX : public ParseUBX
 {
