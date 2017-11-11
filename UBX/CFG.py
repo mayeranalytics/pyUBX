@@ -119,7 +119,6 @@ class CFG:
                     }
             )
 
-    @addGet
     class PRT:
         u"""§31.11.22.4 Port Configuration."""
 
@@ -135,3 +134,11 @@ class CFG:
             outProtoMask= X2(7)
             flags       = X2(8)
             reserved3   = U2(9)
+
+    class PRT_GET:
+        u"""§31.11.22.4 Port Configuration."""
+
+        _id = 0x00
+
+        class Fields:
+            portID      = U1(1)
