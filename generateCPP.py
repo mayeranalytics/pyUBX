@@ -67,6 +67,7 @@ def makeMessageStruct(file, className, Message, indent=4):
     fullClassName = "{}::{}".format(className, messageName)
     if Message.__doc__ is not None:
         file.write(makeComment(Message.__doc__))
+        file.write("\n")
     file.write("struct {} : public Message\n".format(fullClassName))
     file.write("{\n")
     _id = Message._id
