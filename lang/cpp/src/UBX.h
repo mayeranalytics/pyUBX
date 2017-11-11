@@ -9,6 +9,7 @@ template<class T>
 class _iterator {
 public:
     _iterator<T>(char* data, size_t size) :size(size), data(data), i(0) {}
+    _iterator<T>(T& msg, size_t size) :size(size), data((char*)(&msg)), i(0) {}
     bool end() const {
         return i >= size;
     }
