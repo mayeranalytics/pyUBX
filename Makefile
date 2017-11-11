@@ -1,7 +1,7 @@
 all: lang/cpp/src
 	./generateCpp.py
 
-tests:
+test:
 	make -C lang/cpp/ test
 
 lang/cpp/src:
