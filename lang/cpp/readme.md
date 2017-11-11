@@ -67,14 +67,14 @@ class ParseNMEABase
 public:
     // Constructor. 
     ParseNMEABase(char* const buf, const size_t BUFLEN);
-    
+
     // Parse one new byte.
     bool parse(uint8_t);
 
     // NMEA callback. You must implement this in a derived class.
     // buf is guaranteed to be a null-terminated string.
     virtual void onNMEA(char buf[], size_t len) = 0;
-    
+
     // NMEA error callback
     // Override this function if needed.
     virtual void onNMEAerr() {};
@@ -88,13 +88,13 @@ Class `ParseNMEA` then parses the NMEA payload and calls the appropriate callbac
 class ParseNMEA
 {
 public:
-  	// Parse one new byte.
+    // Parse one new byte.
     void parse(char buf[], size_t max_len);
 
-    // GGA callback 
+    // GGA callback
     virtual void onGGA(
-        uint32_t utc, 
-        float    lat, 
+        uint32_t utc,
+        float    lat,
         float    lon,
         uint8_t  qual,
         uint8_t  n_satellites,
@@ -132,10 +132,11 @@ public:
     // Override this function.
     virtual void onUBXerr(uint8_t cls, uint8_t id, uint16_t len, Error err) {};
 };
-
 ```
 
-Class `ParseUBX` then parses the UBX payload and calls the appropriate callback such as `onACK_NAK `. `ParseUBX` is implemented by the C++-generator `generateCpp.py`. It automatically creates the callbacks for each UBX message and has the correct (lengthy) switch statements in `onUBX`.
+Class `ParseUBX` parses the UBX payload and calls the appropriate callback such as `onACK_NAK `.
+`ParseUBX` is implemented by the C++-generator `generateCpp.py`. It automatically creates the 
+callbacks for each UBX message and has the correct (lengthy) switch statements in `onUBX`.
 
 ```c++
 // parseUBX.h
@@ -143,21 +144,20 @@ Class `ParseUBX` then parses the UBX payload and calls the appropriate callback 
 class ParseUBX : public ParseUBXBase
 {
 public:
-	// constructor
+    // constructor
     ParseUBX(char* const buf, const size_t BUFLEN) : ParseUBXBase(buf, BUFLEN) {};
 
     // callback for ACK::ACK_ messages
     virtual void onACK_ACK_(ACK::ACK_& msg) {}
-    
+
     // callback for ACK::NAK messages
     virtual void onACK_NAK(ACK::NAK& msg) {}
-    
+
     // etc...
 
 private:
     void onUBX(uint8_t cls, uint8_t id, size_t len, char buf[]);
 };
-    
 ```
 
 The whole machinery is brought together in class `Parse` (implemented in `parse.h`).
@@ -168,8 +168,8 @@ The resulting structure looks like this:
 graph TD;
     ParseUBX-->Parse;
     ParseUBXBase-->ParseUBX;
-	ParseNMEA-->Parse;
-	ParseNMEABase-->Parse;
+    ParseNMEA-->Parse;
+    ParseNMEABase-->Parse;
 ```
 
 Todo: Derive ParseNMEA from ParseNMEABase and Parse from ParseNMEA.
@@ -184,4 +184,3 @@ cd googletest
 cmake .
 make -j
 ```
-

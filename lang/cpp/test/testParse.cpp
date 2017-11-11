@@ -16,7 +16,7 @@ public:
         onACK_ACK_called = false;
         onGGA_called = false;
     }
-    void onACK_ACK_(ACK::ACK_&) {
+    void onACK_ACK_(ACK::ACK_&, size_t len) {
         onACK_ACK_called = true;
     }
     bool onACK_ACK_called;
@@ -39,7 +39,7 @@ TEST(Parse, UBX) {
     const size_t BUFLEN=256;
     char buf[BUFLEN];
     MyParse parse(buf, BUFLEN);
-    char msg[] = "\xb5\x62\x05\x01\x00\x00\x06\x17";
+    char msg[] = "\xb5\x62\x05\x01\x00\x00\x06\x17"; // ACK-ACK
     for(size_t i=0; i<sizeof(msg)-1; i++) {
         parse.parse(msg[i]);
     }

@@ -67,7 +67,7 @@ def makeMessageStruct(file, className, Message, indent=4):
     fullClassName = "{}::{}".format(className, messageName)
     if Message.__doc__ is not None:
         file.write(makeComment(Message.__doc__))
-    file.write("struct {}\n".format(fullClassName))
+    file.write("struct {} : public Message\n".format(fullClassName))
     file.write("{\n")
     _id = Message._id
     _class = Message._class
@@ -184,7 +184,7 @@ if __name__ == '__main__':
             fNames.append((fName, className, messageName))
             cppClassName = "{}::{}".format(className, messageName)
             file.write("            case 0x{:02X}: // Message {}-{}\n".format(Message._id, className, messageName))
-            file.write("                {}(*(({}*)buf));\n".format(fName, cppClassName))
+            file.write("                {}(*(({}*)buf), len);\n".format(fName, cppClassName))
             file.write("                break;\n".format(name))
         file.write("            default:\n")
         file.write("                onUBXerr(cls, id, len, NotImplemented);\n")
@@ -198,7 +198,7 @@ if __name__ == '__main__':
     file.write("public:\n")
     for fName, className, messageName in fNames:
         file.write("    /* callback for {}::{} messages */\n".format(className, messageName))
-        file.write("    virtual void {}({}::{}& msg) {{}}\n".format(fName, className, messageName))
+        file.write("    virtual void {}({}::{}& msg, size_t len) {{}}\n".format(fName, className, messageName))
         file.write("    \n")
     file.write("private:\n")
     file.write("    ParseUBX();\n")

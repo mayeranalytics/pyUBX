@@ -89,11 +89,11 @@ public:
         ACK_ACK_called = CFG_PMS_called = error = false;
     }
     bool ACK_ACK_called;
-    void onACK_ACK_(ACK::ACK_& msg) {
+    void onACK_ACK_(ACK::ACK_& msg, size_t len) {
         ACK_ACK_called = true;
     }
     bool CFG_PMS_called;
-    void onCFG_PMS(CFG::PMS& msg) {
+    void onCFG_PMS(CFG::PMS& msg, size_t len) {
         CFG_PMS_called = true;
     }
     bool error;

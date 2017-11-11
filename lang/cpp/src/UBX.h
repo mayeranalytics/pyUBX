@@ -23,4 +23,7 @@ private:
     char* data;
 };
 
+struct Message {
+};
+
 #endif // #define __UBX_H__
