@@ -6,12 +6,20 @@
 class SerializeUBX
 {
 public:
+    /* Write one byte, you must implement this function in a derived class.
+     */
     virtual void writeByte(uint8_t byte) = 0;
-    /* Serialize message T
+    /* Serialize message T from char*
      */
     template<class T>
-    void serialize(uint8_t* data, uint16_t len) {
-        _serialize(data, len, T::classID, T::messageID);
+    void serialize(uint8_t* payload, uint16_t payload_len) {
+        _serialize(payload, payload_len, T::classID, T::messageID);
+    }
+    /* Serialize message T from T&
+     */
+    template<class T>
+    void serialize(T& message, uint16_t payload_len=sizeof(T)) {
+        _serialize((char*)(&message), payload_len, T::classID, T::messageID);
     }
     /* Serialize message T with zero length payload
      */
