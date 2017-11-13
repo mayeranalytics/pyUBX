@@ -160,6 +160,7 @@ class CFG:
             pulseLenRatio = U4(8)  # Pulse length or duty cycle, depending on 'isLength'
             pulseLenRatioLock = U4(9)  # Pulse length or duty cycle when locked to GPS time, only used if 'lockedOtherSet' is set
             userConfigDelay = I4(10)  # User configurable time pulse delay
+            flags = X4(11)  # Configuration flags
 
     class TP5_GET:
         u"""§31.11.32.2 Poll Time Pulse Parameters."""
