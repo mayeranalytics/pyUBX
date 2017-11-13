@@ -67,7 +67,6 @@ protected:
 bool
 ParseUBXBase::parse(uint8_t c)
 {
-    uint8_t i;
     switch(state) {
     case START:
         if(c == 0xb5)
