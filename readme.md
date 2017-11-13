@@ -138,7 +138,8 @@ MON-VER
   - `RXM`: RXM configuration
   - `TP5`: Time Pulse Parameters
 - class **`MON`**:
-  - `VER`
+  - `VER`: Receiver/Software Version	
+  - `HW`: Hardware Status
 
 ## Usage
 
