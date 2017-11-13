@@ -2,7 +2,7 @@
 
 from UBXMessage import UBXMessage, initMessageClass, addGet
 import struct
-from Types import U1, U2, U4, X2, X4, U
+from Types import U1, U2, U4, X2, X4, U, I2, I4
 
 
 @initMessageClass
@@ -142,3 +142,21 @@ class CFG:
 
         class Fields:
             portID      = U1(1)
+
+    @addGet
+    class TP5:
+        u"""§31.11.32.3 Time Pulse Parameters."""
+
+        _id = 0x31
+
+        class Fields:
+            tpIdx = U1(1)   # Time pulse selection (0 = TIMEPULSE, 1 = TIMEPULSE2)
+            version = U1(2)  # Message version (0x00 for this version)
+            reserved2 = U2(3)
+            antCableDelay = I2(4)  # Antenna cable delay
+            rfGroupDelay = I2(5)  # RF group delay
+            freqPeriod = U4(6)  # Frequency or period time, depending on setting of bit 'isFreq'
+            freqPeriodLock = U4(7)  # Frequency or period time when locked to GPS time, only used if 'lockedOtherSet' is set
+            pulseLenRatio = U4(8)  # Pulse length or duty cycle, depending on 'isLength'
+            pulseLenRatioLock = U4(9)  # Pulse length or duty cycle when locked to GPS time, only used if 'lockedOtherSet' is set
+            userConfigDelay = I4(10)  # User configurable time pulse delay
