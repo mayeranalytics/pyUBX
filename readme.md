@@ -136,6 +136,7 @@ MON-VER
   - `PRT`: Port configuration
   - `RATE`: Navigation/Measurement rate settings
   - `RXM`: RXM configuration
+  - `TP5`: Time Pulse Parameters
 - class **`MON`**:
   - `VER`
 
