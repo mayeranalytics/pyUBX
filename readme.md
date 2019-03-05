@@ -212,7 +212,7 @@ The decorator `@_InitType` does most of the work: It implements the `__init__`, 
 
 ### `UBX.py`
 
-`UBX.py` is a utlilty that allows to send UBX commands to the device. For example, to switch into power save mode and then start umping NMEA messages, run
+`UBX.py` is a utlilty that allows to send UBX commands to the device. For example, to switch into power save mode and then start dumping NMEA messages, run
 
 ```bash
 ./UBX.py --RXM 1 --NMEA
