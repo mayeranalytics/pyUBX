@@ -53,7 +53,10 @@ class UBXManager(threading.Thread):
             sys.stderr.write("Writing log to UBX.log\n")
         self._reset()
         while not self._shutDown:
-            byte = self.ser.read(1)
+            if hasattr(self.ser, 'read'):
+                byte = self.ser.read(1)
+            else:
+                byte = self.ser.recv(1)
             if self.debug:
                 logfile.write(byte)
                 logfile.flush()
@@ -207,7 +210,10 @@ class UBXManager(threading.Thread):
         from UBXMessage import formatByteString
         if self.debug:
             print("SEND: {}".format(formatByteString(msg)))
-        self.ser.write(msg)
+        if hasattr(self.ser, 'write'):
+            self.ser.write(msg)
+        else:
+            self.ser.send(msg)
 
     def shutdown(self):
         """Stop the manger."""
