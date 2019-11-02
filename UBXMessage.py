@@ -268,7 +268,7 @@ def parseUBXPayload(msgClass, msgId, payload):
     if Subcls is None:
         raise Exception(
             "Cannot parse message ID {} of message class {}.\n Available: {}"
-            .format(msgId, msgClass.__name__, Cls._lookup))
+            .format(msgId, msgClass, Cls._lookup))
     return Subcls(payload)
 
 
