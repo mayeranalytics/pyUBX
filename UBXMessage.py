@@ -14,7 +14,9 @@ class MessageClass(Enum):
     NAV = b'\x01'  # Navigation Results Messages: Position, Speed, Time, Acceleration, Heading, DOP, SVs used
     RXM = b'\x02'  # Receiver Manager Messages: Satellite Status, RTC Status
     INF = b'\x04'  # Information Messages: Printf-Style Messages, with IDs such as Error, Warning, Notice
+    ACK = b'\x05'  # Ack/nak if configuration messages
     UPD = b'\x09'  # Firmware Update Messages: Memory/Flash erase/write, Reboot, Flash identification, etc.
+    MON = b'\x0A'  # Monitoring messages
     AID = b'\x0B'  # AssistNow Aiding Messages: Ephemeris, Almanac, other A-GPS data input
     TIM = b'\x0D'  # Timing Messages: Time Pulse Output, Time Mark Results
     ESF = b'\x10'  # External Sensor Fusion Messages: External Sensor Measurements and Status Information
