@@ -5,7 +5,6 @@ import threading
 from enum import Enum
 import sys
 
-
 class UBXManager(threading.Thread):
     """The NMEA/UBX reader/writer thread."""
 
@@ -26,6 +25,7 @@ class UBXManager(threading.Thread):
     def __init__(self, ser, debug=False):
         """Instantiate with serial."""
         from UBXMessage import UBXMessage
+        import UBX
         threading.Thread.__init__(self)
         self.ser = ser
         self.debug = debug

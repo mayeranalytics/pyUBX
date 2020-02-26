@@ -7,7 +7,6 @@ from enum import Enum
 import sys
 from itertools import accumulate
 
-
 class MessageClass(Enum):
     """UBX Class IDs."""
 
