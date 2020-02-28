@@ -4,6 +4,7 @@
 import threading
 from enum import Enum
 import sys
+from queue import Queue
 
 class UBXManager(threading.Thread):
     """The NMEA/UBX reader/writer thread."""
@@ -218,3 +219,27 @@ class UBXManager(threading.Thread):
     def shutdown(self):
         """Stop the manger."""
         self._shutDown = True
+
+
+class UBXQueue(UBXManager):
+    """UBX Mananger that puts good UBX messages on queue"""
+
+    def __init__(self, ser, debug=False, start=True, queue=None):
+        """
+        :param ser: Passed to UBXManager
+        :param start: Passed to UBXManager
+        :param queue: Optional queue to use, otherwise uses own
+        """
+        self._queue = queue if queue else Queue()
+        # Reflects the has-a queue's get() and empty() methods
+        self.get = self._queue.get
+        self.empty = self._queue.empty
+        super(UBXQueue, self).__init__(ser=ser, debug=debug)
+        self.start()
+
+    def onUBX(self, obj):  # handle good UBX message
+        self._queue.put(obj)
+
+    def join(self):
+        super(UBXQueue, self).join()
+        self._queue.join()

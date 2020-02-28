@@ -110,8 +110,8 @@ class NAV:
             return datetime.datetime(year=self.year, month=self.month,
                                      day=self.day, hour=self.hour,
                                      minute=self.min, second=self.sec,
-                                     microsecond=self.nano//1000,
-                                     tzinfo=datetime.timezone.utc)
+                                     tzinfo=datetime.timezone.utc
+                                     ) + datetime.timedelta(seconds=self.nano*1e-9)
 
         @property
         def position_dm(self):
@@ -152,7 +152,7 @@ class NAV:
             """
             return 1e-3 * self.gSpeed
 
-        def __str__(self):
+        def summary(self):
             return ("UBX.NAV.PVT:       {}z  {:12.7f} E {:11.7f} N {:8.1f} m(MSL)"
                 .format(self.UTC.isoformat()[:21], *self.position_dm)
                     + " speed = {:.3f} m/s at NED: {:.3f}, {:.3f}, {:.3f}"
@@ -198,7 +198,7 @@ class NAV:
                     self.relPosD * 1e-2 + self.relPosHPD * 1e-4]
 
         @property
-        def relPosHeading_deg(self):
+        def heading_deg(self):
             """
             Relative Position Heading in degrees
             :return:
@@ -206,17 +206,17 @@ class NAV:
             return self.relPosHeading * 1e-5
 
         @property
-        def relPosLength_m(self):
+        def length_m(self):
             return self.relPosLength * 1e-2 + self.relPosHPLength * 1e-4
 
         @property
-        def relPosPitch_deg(self):
+        def pitch_deg(self):
             """
             Relative Position pitch in degrees
             :return:
             """
             return math.degrees(math.asin(-(self.relPosD * 1e-2 + self.relPosHPD * 1e-4)
-                                          / self.relPosLength_m))
+                                          / self.length_m))
 
         @property
         def TOW_str(self):
@@ -225,8 +225,8 @@ class NAV:
             days, hours = divmod(hours, 24)
             return "{:1d}-{:02d}:{:02d}:{:04.1f}gps".format(days, hours, mins, millis/1000)
 
-        def __str__(self):
+        def summary(self):
             return ("UBX.NAV.RELPOSNED: TOW = {} NED = {:8.5f}, {:8.5f}, {:8.5f} m"
                     .format(self.TOW_str, *self.relPosNED_m)
-                + "-> heading {:9.2f} deg, {:8.2f} up, len {:.3f} m"
-                    .format(self.relPosHeading_deg, self.relPosPitch_deg, self.relPosLength_m))
+                    + "-> heading {:9.2f} deg, {:8.2f} up, len {:.3f} m"
+                    .format(self.heading_deg, self.pitch_deg, self.length_m))
