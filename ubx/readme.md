@@ -14,12 +14,16 @@ defined in [UBX-13003221 - R13, §31](https://www.u-blox.com/sites/default/files
 
 #### Cloning
 
+The python module, `ubx`, is installed with `pip` from the top level directory.
+
 The C++ parser/generator depends on [googletest](https://github.com/google/googletest). If you want to run the C++ tests then check out the repo using the `—recursive` option and build googletest:
 
 ```bash
 # clone into ./pyUBX
 git clone --recursive https://github.com/mayeranalytics/pyUBX.git 
 cd pyUBX
+# Install library for use in python
+pip install .
 # build googletest
 pushd lang/cpp/test/googletest
 cmake .
@@ -143,7 +147,7 @@ MON-VER
 
 ## Usage
 
-The two main classes are `UBXManager` and `UBXMessage`. They are defined in files with the same name.
+The two main classes are `UBXManager` and `UBXMessage`.
 
 ### `UBXManager`
 
@@ -151,12 +155,24 @@ The two main classes are `UBXManager` and `UBXMessage`. They are defined in file
 
 ```python
 import serial
-from ubx.UBXManager import UBXManager
+from ubx import UBXManager
 ser = serial.Serial('/dev/ttyAMA0', 9600, timeout=None)
 manager = UBXManager(ser, debug=True)
 ```
 
 The manager can be instantiated with any serial object that has a `read(n)` function that reads `n` bytes from the stream. Nothing more is required (in fact all it needs is `read(1)`).
+
+If a file is used as the data source, it should be opened as binary.
+(Note that this will result in a CPU-hogging busy-wait where the thread repeatedly tries to read from the file after it
+reaches the end.) 
+
+```python
+import serial
+from ubx import UBXManager
+infile = serial.Serial('testfile.dat', 'rb')
+manager = UBXManager(infile, debug=True)
+```
+
 
 The manager thread is then started like this:
 
@@ -287,6 +303,10 @@ For field tests single board computers (SBCs) can be used. Some draw less than 2
 - **[Beaglebone Black](https://beagleboard.org/black)**: Well equipped with on-board flash, 2 x SPI, 2 x I<sup>2</sup>C, 4 x UART, etc., but not so cheap (around 50$).
 - **[Pine64](https://www.pine64.org)**: Rather large and power hungry (300-800mA current draw), but cheap yet powerful with an Allwinner R18 quad-core A64 processor and [generous I/O](https://drive.google.com/file/d/0B0cEs0lxTtL3YU1CNmJ2bEIzTlE/view).
 - [**UDOO Neo**](https://www.udoo.org/docs-neo/Introduction/Introduction.html): i.MX 6SoloX-based with 3 x UART, 3 x I<sup>2</sup>C, but only 1 x SPI. The basic version is about 50$.
+
+Although this has not been tested, a microcontroller running [MicroPython](https://micropython.org) 
+or [CircuitPython](https://circuitpython.org) should be capable of using this library with modifications.
+(In particular, CircuitPython does not support threading, which is used by `UBXManager`.)
 
 #### Typical setup
 
