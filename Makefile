@@ -1,5 +1,5 @@
 all: lang/cpp/src
-	./generateCpp.py
+	./ubx/generateCpp.py
 
 test:
 	make -C lang/cpp/ test

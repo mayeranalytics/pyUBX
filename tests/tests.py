@@ -3,7 +3,7 @@
 
 import unittest
 from ubx import UBX
-from ubx.UBXMessage import parseUBXPayload, parseUBXMessage
+from ubx import parseUBXPayload, parseUBXMessage
 
 
 class TestStringMethods(unittest.TestCase):

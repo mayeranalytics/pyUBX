@@ -151,8 +151,7 @@ class Manager(UBXManager):
         self.send(msg)
 
 
-if __name__ == '__main__':
-
+def ubxtool_main():
     parser = argparse.ArgumentParser(
         description='Send UBX commands to u-blox M8 device.'
         )
@@ -219,3 +218,6 @@ if __name__ == '__main__':
         sys.exit(0)
 
     sys.exit(1)
+
+if __name__ == '__main__':
+    main()
