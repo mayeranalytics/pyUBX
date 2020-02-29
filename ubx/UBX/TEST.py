@@ -1,7 +1,7 @@
 """Solely for testing purposes. """
 
-from UBXMessage import initMessageClass, addGet
-from Types import U1, U2
+from ubx.UBXMessage import initMessageClass, addGet
+from ubx.Types import U1, U2
 
 
 @initMessageClass

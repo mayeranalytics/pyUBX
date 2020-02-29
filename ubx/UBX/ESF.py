@@ -1,9 +1,9 @@
 """Navigation result messages"""
 
-from UBXMessage import initMessageClass, addGet, parseUBXPayload
+from ubx.UBXMessage import initMessageClass, addGet, parseUBXPayload
 import struct
-import UBXESFSensor
-from Types import U2, U4, X2, X4
+from ubx import UBXESFSensor
+from ubx.Types import U2, U4, X2, X4
 
 
 @initMessageClass

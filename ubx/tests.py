@@ -2,8 +2,8 @@
 """Unit tests."""
 
 import unittest
-import UBX
-from UBXMessage import parseUBXPayload, parseUBXMessage
+from ubx import UBX
+from ubx.UBXMessage import parseUBXPayload, parseUBXMessage
 
 
 class TestStringMethods(unittest.TestCase):

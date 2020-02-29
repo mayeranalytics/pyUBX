@@ -8,7 +8,7 @@ defined in [UBX-13003221 - R13, §31](https://www.u-blox.com/sites/default/files
 - decorators keep the boilerplate code at a minimum
 - interact with a device using a REPL
 - use as a parser generator for other languages or definition files for other parser generators, implemented are:
-  - [C++](lang/cpp/readme.md), separately published as [https://github.com/mayeranalytics/pyUBX-Cpp](https://github.com/mayeranalytics/pyUBX-Cpp)
+  - [C++](../lang/cpp/readme.md), separately published as [https://github.com/mayeranalytics/pyUBX-Cpp](https://github.com/mayeranalytics/pyUBX-Cpp)
 
 **Note**: Currently only a subset of all UBX messages is implemented. See the [progress status](#progress-status) below.
 
@@ -151,7 +151,7 @@ The two main classes are `UBXManager` and `UBXMessage`. They are defined in file
 
 ```python
 import serial
-from UBXManager import UBXManager
+from ubx.UBXManager import UBXManager
 ser = serial.Serial('/dev/ttyAMA0', 9600, timeout=None)
 manager = UBXManager(ser, debug=True)
 ```
@@ -259,7 +259,7 @@ optional arguments:
 
 ### C++
 
-See [Lang C++](lang/cpp/readme.md), also separately published as [https://github.com/mayeranalytics/pyUBX-Cpp](https://github.com/mayeranalytics/pyUBX-Cpp).
+See [Lang C++](../lang/cpp/readme.md), also separately published as [https://github.com/mayeranalytics/pyUBX-Cpp](https://github.com/mayeranalytics/pyUBX-Cpp).
 
 ## Protoyping with Python
 

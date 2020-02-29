@@ -4,7 +4,7 @@ TARGETS=bin/testParseUBX bin/testParseNMEA bin/testParse
 DEP=../src/parseUBXBase.h ../src/parseNMEABase.h ../src/parseNMEA.h ../src/UBX.h ../src/serializeUBX.h ../src/parseUBX.h ../src/parse.h
 all: bin $(TARGETS)
 
-bin/%:%.cpp $(DEP) ../src/messages/MON.h ./prettyprint.h
+bin/%:%.cpp $(DEP) ../src/messages/MON.h ./prettyprint.h bin
 	g++ $(LDFLAGS) $(CXXFLAGS) $< -o$@
 
 test: $(TARGETS)

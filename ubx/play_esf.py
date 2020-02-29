@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """A space to play around with messages."""
 
-import UBX
+from ubx import UBX
 import serial, time, math
-from UBXESFSensor import *
+from ubx.UBXESFSensor import *
 
 
 if __name__ == '__main__':
