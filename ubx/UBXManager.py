@@ -253,11 +253,15 @@ class UBXQueue(UBXManager):
         """
         self._queue = queue if queue else Queue()
         # Reflects the has-a queue's get() and empty() methods
-        self.get = self._queue.get
         self.empty = self._queue.empty
         super(UBXQueue, self).__init__(ser=ser, debug=debug, eofTimeout=eofTimeout)
         if start:
             self.start()
+
+    def get(self, *args, **kwargs):
+        m = self._queue.get(*args, **kwargs)
+        self._queue.task_done()
+        return m
 
     def onUBX(self, obj):  # handle good UBX message
         self._queue.put(obj)

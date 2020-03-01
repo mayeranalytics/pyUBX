@@ -1,7 +1,5 @@
 import unittest
 
-from IPython.testing.tools import make_tempfile
-
 import ubx
 from pathlib import Path
 import time
@@ -10,14 +8,15 @@ import tempfile
 
 class RelposnedTest(unittest.TestCase):
     def test_binfile(self):
-        """ Test the binary file with 4 PVT & RELPOSNED pairs of records from a
-        uBlox-F9P paired with another F9P to form a GPS compass.
-        The first pair is before the GPS fully locked on.  The remaining 3
-        are after a gap in time to let the GPS eliminate carrier ambiguity
+        """ Test the binary file with PVT & RELPOSNED(v1) records.
+        Data from a uBlox-F9P paired with another F9P to form a GPS compass.
+        The first PVT-RELPOSNED pair is before the GPS fully locked on.  The remaining 3
+        are after a gap in time to let the GPS eliminate carrier ambiguity.
         """
-        testfile = Path(__file__).parent.joinpath("testdata", "relposned_test.bin")
+        testfname = Path(__file__).parent.joinpath("testdata", "relposned_test.bin")
         nmsg = 8
-        ubxq = ubx.UBXQueue(ser=testfile.open("rb"), start=True, eofTimeout=0)
+        testfile = testfname.open("rb")
+        ubxq = ubx.UBXQueue(ser=testfile, start=True, eofTimeout=0)
         # Read and test
         time.sleep(1)
         self.assertFalse(ubxq.empty())
@@ -33,7 +32,7 @@ class RelposnedTest(unittest.TestCase):
             pass
 
         # Check that the messages are the same both as summaries and pretty-prints.
-        testascii = testfile.parent.joinpath(testfile.stem+'.txt')
+        testascii = testfname.parent.joinpath(testfname.stem+'.txt')
         testasciiout = Path(tempfile.mktemp(testascii.stem))
         print("Writing ",testasciiout)
         fout = testasciiout.open("w")
@@ -47,6 +46,9 @@ class RelposnedTest(unittest.TestCase):
             with fname.open() as f:
                 strings.append(f.read())
         self.assertEqual(*strings)
+        testfile.close()
+        ubxq.join()
+
 
 
 if __name__ == '__main__':

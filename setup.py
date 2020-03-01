@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='pyUBX',
-    version='0.1a',
+    version='0.1a2',
     packages=['ubx', 'ubx.UBX'],
     url='https://github.com/mayeranalytics/pyUBX',
     license='GPL-3.0',

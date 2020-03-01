@@ -3,6 +3,7 @@ all: lang/cpp/src
 
 test:
 	make -C lang/cpp/ test
+	python -m unittest -v ubx tests/test*.py
 
 lang/cpp/src:
 	mkdir -p $<
