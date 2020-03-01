@@ -5,6 +5,6 @@ from .parse_NMEA_log import NMEAChkSum, parse_NMEA_log_main
 from .Tables import GNSS_Identifiers
 from .UBXESFSensor import SensorDataType, SensorMeasurement, SensorTransform
 from .UBXMessage import UBXMessage, parseUBXMessage, parseUBXPayload, addGet
-from .UBXManager import UBXManager
+from .UBXManager import UBXManager, UBXQueue
 from .UBXtool import ubxtool_main
 from . import UBX

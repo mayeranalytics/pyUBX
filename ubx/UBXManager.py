@@ -6,6 +6,7 @@ from enum import Enum
 import sys
 from queue import Queue
 from ubx import UBXMessage
+import time
 
 
 class UBXManager(threading.Thread):
@@ -25,11 +26,17 @@ class UBXManager(threading.Thread):
         UBX_CHKSUM_1 = 10
         UBX_CHKSUM_2 = 11
 
-    def __init__(self, ser, debug=False):
-        """Instantiate with serial."""
+    def __init__(self, ser, debug=False, eofTimeout=None):
+        """Instantiate with serial.
+
+        :param ser: serial port, file, or other object that supports ser.read(1)
+        :param debug: write to log.   (filename, or if True, default to ./UBX.log)
+        :param eofTimeout:  seconds to wait for more bytes on read.  Default None->keep trying
+        """
         threading.Thread.__init__(self)
         self.ser = ser
         self.debug = debug
+        self.eofTimeout = eofTimeout
         self._shutDown = False
         self.ubx_chksum = UBXMessage.Checksum()
 
@@ -50,12 +57,22 @@ class UBXManager(threading.Thread):
             self._fromUBX_CHKSUM_2,
         ]
         if self.debug:
-            logfile = open("UBX.log", "wb")
-            sys.stderr.write("Writing log to UBX.log\n")
+            debugfile = "UBX.log" if self.debug is True else self.debug
+            logfile = open(debugfile, "wb")
+            sys.stderr.write("Writing log to {}\n".format(debugfile))
         self._reset()
         while not self._shutDown:
             if hasattr(self.ser, 'read'):
                 byte = self.ser.read(1)
+                if len(byte) == 0:
+                    if self.eofTimeout is None:
+                        time.sleep(0.01)    # Sleep 10 ms so at least it is not just busy-waiting
+                        continue
+                    else:
+                        time.sleep(self.eofTimeout)
+                        byte = self.ser.read(1)
+                        if len(byte) == 0:
+                            break   # Still nothing.  Done
             else:
                 byte = self.ser.recv(1)
             if self.debug:
@@ -222,20 +239,25 @@ class UBXManager(threading.Thread):
 
 
 class UBXQueue(UBXManager):
-    """UBX Mananger that puts good UBX messages on queue"""
+    """UBX Mananger that puts good UBX messages on queue
 
-    def __init__(self, ser, debug=False, start=True, queue=None):
+    Use .empty() and .get() as for a queue.Queue
+    """
+
+    def __init__(self, ser, debug=False, start=False, eofTimeout=None, queue=None):
         """
         :param ser: Passed to UBXManager
-        :param start: Passed to UBXManager
+        :param eofTimeout: Passed to UBXManager
+        :param start: start thread immediately on init
         :param queue: Optional queue to use, otherwise uses own
         """
         self._queue = queue if queue else Queue()
         # Reflects the has-a queue's get() and empty() methods
         self.get = self._queue.get
         self.empty = self._queue.empty
-        super(UBXQueue, self).__init__(ser=ser, debug=debug)
-        self.start()
+        super(UBXQueue, self).__init__(ser=ser, debug=debug, eofTimeout=eofTimeout)
+        if start:
+            self.start()
 
     def onUBX(self, obj):  # handle good UBX message
         self._queue.put(obj)

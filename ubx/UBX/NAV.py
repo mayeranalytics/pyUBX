@@ -160,7 +160,10 @@ class NAV:
     @addGet
     class RELPOSNED:
         # WARNING: This is for Protocol version 27.11 (uBlox-9)
-        #
+        # The uBlox-8 defines a different structure with a different length.
+        # Attempting to read the uBlox-8 format will result in an error condition
+        # (but not silently erroneous data).
+
         _id = 0x3c
 
         class Fields:
