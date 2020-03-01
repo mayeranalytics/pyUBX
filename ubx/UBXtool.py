@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""TODO."""
+"""UBXTool is a command line app for sending and receiving UBX commands."""
 
 import sys
 import os
@@ -9,9 +9,8 @@ from threading import Lock
 from enum import Enum
 import argparse
 import datetime
-import UBX
-from UBXManager import UBXManager
-from FSM import *
+from ubx.UBXManager import UBXManager
+from ubx.FSM import *
 
 
 @FSM_Get(UBX.MON.VER)
@@ -97,7 +96,7 @@ class Manager(UBXManager):
     def onUBX(self, obj):
         with self._lock:
             if self._fsm is not None:
-                self._fsm.onUBX(obj, manager)
+                self._fsm.onUBX(obj, self)
                 if self._fsm.done():
                     self._fsm = None
             else:
@@ -152,8 +151,7 @@ class Manager(UBXManager):
         self.send(msg)
 
 
-if __name__ == '__main__':
-
+def ubxtool_main():
     parser = argparse.ArgumentParser(
         description='Send UBX commands to u-blox M8 device.'
         )
@@ -220,3 +218,6 @@ if __name__ == '__main__':
         sys.exit(0)
 
     sys.exit(1)
+
+if __name__ == '__main__':
+    main()

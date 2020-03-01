@@ -1,10 +1,9 @@
 """Navigation result messages"""
 
-from UBXMessage import UBXMessage, initMessageClass, addGet
-import struct
-from Types import U1, U2, U4, X1, X2, X4, U, I1, I2, I4
 import math
 import datetime
+from ubx.UBXMessage import initMessageClass, addGet
+from ubx.Types import U1, U2, U4, X1, X2, X4, I1, I2, I4
 
 # Reference for u-blox 9:
 # https://www.u-blox.com/sites/default/files/u-blox_ZED-F9P_InterfaceDescription_%28UBX-18010854%29.pdf
