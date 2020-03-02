@@ -25,13 +25,15 @@ def getMessageName(cls, withUBX=True, withMessageClass=True, withMessageName=Tru
 
     The classname for a message is ubx.UBX.{msgclass}.{msgclass}.{msgname}
     with the .{msgname} missing if cls is the Message Class class rather than a submessge
-    :param cls:
+    :param cls:  A message or a message class
     :param withUBX:
     :param withMessageClass:
     :param withMessageName:
     :param separator: string to put between components
     :return:
     """
+    if not isinstance(cls, type):
+        cls = cls.__class__ # Convert message to its class.
     classNameParts = getClassName(cls).split(".")
     assert classNameParts[0] == "ubx" and classNameParts[1] == "UBX"
     assert classNameParts[2] == classNameParts[3]   # Duplicated msgclass
