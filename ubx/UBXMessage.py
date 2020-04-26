@@ -5,7 +5,8 @@ import struct
 import inspect
 from enum import Enum
 import sys
-from itertools import accumulate
+
+import ubx.UBX
 
 
 class MessageClass(Enum):
@@ -247,11 +248,11 @@ def classFromMessageClass():
     """Look up the python class corresponding to a UBX message class.
 
     The result is something like
-    [(5, UBX.ACK.ACK), (6, UBX.CFG.CFG), (10, UBX.MON.MON)]
+    {5: ubx.UBX.ACK.ACK, 6: ubx.UBX.CFG.CFG, 10: ubx.UBX.MON.MON}
     """
     return dict([
         (getattr(v, '_class'), v)
-        for (k, v) in inspect.getmembers(sys.modules["UBX"], inspect.isclass)
+        for (k, v) in inspect.getmembers(sys.modules["ubx.UBX"], inspect.isclass)
         if v.__name__ not in [
             "UBXMessage", "U1", "I1", "X1", "U2", "I2", "X2",
             "U4", "I4", "X4", "R4", "R8", "CH", "U"
@@ -290,7 +291,6 @@ def addGet(cls):
     class Get(UBXMessage):
         def __init__(self):
             # this only works because class and module have the same name!
-            import UBX
             _class = eval(cls.__module__)._class
             UBXMessage.__init__(self, _class, cls._id, b'')
     setattr(cls, "Get", Get)
