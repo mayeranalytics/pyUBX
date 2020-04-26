@@ -1,7 +1,9 @@
 # pyUBX
 
-This is a small but functional Python3 wrapper for the u-blox M8 UBX protocol, as
-defined in [UBX-13003221 - R13, §31](https://www.u-blox.com/sites/default/files/products/documents/u-blox8-M8_ReceiverDescrProtSpec_(UBX-13003221)_Public.pdf). The focus is on getting the basics right, which first of all means  correctly creating and parsing UBX messages with usable error messages on failure. The key features are:
+This is a small but functional Python3 wrapper for the u-blox M8 UBX protocol, as defined in [UBX-13003221 - R13, §31](https://www.u-blox.com/sites/default/files/products/documents/u-blox8-M8_ReceiverDescrProtSpec_(UBX-13003221)_Public.pdf) 
+and the u-blox F9 protocol as defined in [UBX-18010854](https://www.u-blox.com/sites/default/files/u-blox_ZED-F9P_InterfaceDescription_%28UBX-18010854%29.pdf).
+
+The focus is on getting the basics right, which first of all means  correctly creating and parsing UBX messages with usable error messages on failure. The key features are:
 
 - parse, generate and manipulate UBX messages
 - message definitions are simple, uncluttered Python code (class definitions)
@@ -135,7 +137,7 @@ MON-VER
   - `ACK` `NAK` 
 - class **`CFG`**:
   - `GNSS` : GNSS system channel sharing configuration
-  - `PSM` : Power mode setup
+  - `PMS` : Power mode setup
   - `PM2`: Extended power management configuration
   - `PRT`: Port configuration
   - `RATE`: Navigation/Measurement rate settings
@@ -144,6 +146,13 @@ MON-VER
 - class **`MON`**:
   - `VER`: Receiver/Software Version	
   - `HW`: Hardware Status
+- class **`NAV`**
+ - `PVT`: Position Velocity Time
+ - `RELPOSNED`: Relative position, as used for differential GPS.  Version 1 (uBlox-9) is implemented, which is incompatible with Version 0 (uBlox-8).  
+ - `DOP`: Dilution of precision
+ - `SVINFO`: 
+- class `**ESF**`
+ - `MEAS`
 
 ## Usage
 
@@ -162,17 +171,16 @@ manager = UBXManager(ser, debug=True)
 
 The manager can be instantiated with any serial object that has a `read(n)` function that reads `n` bytes from the stream. Nothing more is required (in fact all it needs is `read(1)`).
 
-If a file is used as the data source, it should be opened as binary.
-(Note that this will result in a CPU-hogging busy-wait where the thread repeatedly tries to read from the file after it
-reaches the end.) 
+If a file is used as the data source, it should be opened as binary.  
+An `eofTimeout` argument specifies how long the manager waits for more data after reaching the
+end of the file.  (Use `None` to wait indefinitely, use `0` to return when the end-of-file is reached.)
 
 ```python
 import serial
 from ubx import UBXManager
 infile = serial.Serial('testfile.dat', 'rb')
-manager = UBXManager(infile, debug=True)
+manager = UBXManager(infile, debug=True, eofTimeout=0)
 ```
-
 
 The manager thread is then started like this:
 
@@ -181,6 +189,9 @@ manager.start()
 ```
 
 By default `UBXManager` dumps all `NMEA` and `UBX` messages to stdout. By deriving and overriding the member functions `onNMEA`, `onNMEAError`, `onUBX`, `onUBXError` this behaviour can be changed.
+
+An example is given as `UBXQueue`, where onUBX simply enqueues the data, allowing it to be read from a different thread.
+
 
 ### `UBXMessage`
 

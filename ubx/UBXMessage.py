@@ -8,7 +8,6 @@ import sys
 
 import ubx.UBX
 
-
 class MessageClass(Enum):
     """UBX Class IDs."""
 
