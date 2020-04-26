@@ -16,7 +16,6 @@ struct NAV
     struct DOP;
     struct PVT;
     struct RELPOSNED;
-    struct SVINFO;
 };
 
 struct NAV::DOP : public Message
