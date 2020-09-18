@@ -71,7 +71,16 @@ class NAV:
             reserved0 = U2(4)
 
             class Repeated:
-                gnssId = U1(1)
+                gnssId = U1(1, 
+                                allowed={
+                                    0: 'GPS',
+                                    1: 'SBAS',
+                                    2: 'Galileo',
+                                    3: 'BeiDou',
+                                    4: 'IMES',
+                                    5: 'QZSS',
+                                    6: 'GLONASS',
+                                    })
                 svId = U1(2)
                 cno = U1(3)
                 elev = I1(4)
