@@ -60,6 +60,50 @@ class NAV:
                 prRes = I4(8)
 
     @addGet
+    class SAT:
+
+        _id = 0x35
+
+        class Fields:
+            iTOW = U4(1)
+            version = U1(2)
+            numSvs = U1(3)
+            reserved0 = U2(4)
+
+            class Repeated:
+                gnssId = U1(1)
+                svId = U1(2)
+                cno = U1(3)
+                elev = I1(4)
+                azim = I2(5)
+                prRes = I2(6)
+                flags = X4(7)
+
+        @property
+        def TOW_str(self):
+            mins, millis = divmod(self.iTOW, 60000)
+            hours, mins = divmod(mins, 60)
+            days, hours = divmod(hours, 24)
+            return "{:1d}-{:02d}:{:02d}:{:04.1f}gps".format(days, hours, mins, millis/1000)
+
+        def summary(self):
+            summary_str = "UBX.NAV.SAT:       TOW: {}, version: {}, numSvs: {}".format(
+                self.TOW_str, self.version, self.numSvs)
+
+            for i in range(1, self.numSvs+1):
+                summary_str += "\r\n  gnssId: {: >2}, svId: {: >3}, cno: {: >3} dBHz, elev: {: >3}, azim: {: >3}, prRes: {: >5}, flags: 0x{:08X}".format(
+                    self.__getattribute__(f'gnssId_{i}'),
+                    self.__getattribute__(f'svId_{i}'),
+                    self.__getattribute__(f'cno_{i}'),
+                    self.__getattribute__(f'elev_{i}'),
+                    self.__getattribute__(f'azim_{i}'),
+                    self.__getattribute__(f'prRes_{i}'),
+                    self.__getattribute__(f'flags_{i}')
+                )
+
+            return(summary_str)
+
+    @addGet
     class PVT:
 
         _id = 0x07
