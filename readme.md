@@ -147,12 +147,13 @@ MON-VER
   - `VER`: Receiver/Software Version	
   - `HW`: Hardware Status
 - class **`NAV`**
- - `PVT`: Position Velocity Time
- - `RELPOSNED`: Relative position, as used for differential GPS.  Version 1 (uBlox-9) is implemented, which is incompatible with Version 0 (uBlox-8).  
- - `DOP`: Dilution of precision
- - `SVINFO`: 
-- class `**ESF**`
- - `MEAS`
+  - `PVT`: Position Velocity Time
+  - `RELPOSNED`: Relative position, as used for differential GPS.  Version 1 (uBlox-9) is implemented, which is incompatible with Version 0 (uBlox-8).  
+  - `DOP`: Dilution of precision
+  - `SVINFO`: Information about satellites used or visible. Deprecated; users are recommended to use the UBX-NAV-SAT message in preference.
+  - `SAT`: Information about SVs that are either known to be visible or currently tracked by the receiver.
+- class **`qES`**
+  - `MEAS`
 
 ## Usage
 
