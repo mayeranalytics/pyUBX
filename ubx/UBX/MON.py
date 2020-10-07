@@ -1,8 +1,7 @@
 """Monitoring Messages: Communication Status, CPU Load, Stack Usage, Task Status. """
 
 from ubx.UBXMessage import initMessageClass, addGet
-from ubx.Types import CH, U1, U2, X1, X4
-
+from ubx.Types import CH, U, U1, U2, U4, X1, X4
 
 @initMessageClass
 class MON:
@@ -45,3 +44,32 @@ class MON:
             pinIrq = X4(15)   # Mask of Pins Value using the PIO Irq
             pullH = X4(16)    # Mask of Pins Value using the PIO Pull High Resistor
             pullL = X4(17)  # Mask of Pins Value using the PIO Pull Low Resistor
+
+    @addGet
+    class SPAN:
+        """3.14.12.1 Signal Characteristics."""
+
+        _id = 0x31
+
+        class Fields:
+            version = U1(1, allowed={0: "SPAN Message V 0"})  # Message version (Currently 0)
+            numRfBlocks = U1(2)  # Number of RF blocks included
+            reserved0 = U(3,2)  # Reserved
+            class Repeated:
+                spectrum = U(1,256)  # Spectrum Bins (dB unreferenced)
+                span = U4(2)  # Spectrum span (Hz)
+                res = U4(3)  # Bin Resolution (Hz)
+                center = U4(4)  # Center of spectrum span (Hz)
+                pga = U1(5)  # PGA gain (dB)
+                reserved1 = U(6,3)  # Reserved
+
+        @property
+        def spectra(self):
+            return [{
+                "centerFreq": self.__getattribute__(f'center_{blockNum}'),
+                "span": self.__getattribute__(f'span_{blockNum}'),
+                "res": self.__getattribute__(f'res_{blockNum}'),
+                "pga": self.__getattribute__(f'pga_{blockNum}'),
+                "spectrumBinCenterFreqs": [ self.__getattribute__(f'center_{blockNum}') + self.__getattribute__(f'span_{blockNum}') * (i - 128) / 256 for i in range(256)],
+                "spectrum": [rfBin for rfBin in self.__getattribute__(f'spectrum_{blockNum}')]
+            } for blockNum in range(1,self.numRfBlocks+1) ]

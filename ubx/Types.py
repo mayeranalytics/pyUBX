@@ -149,6 +149,7 @@ class U:
     fmt = None  # Not needed
     def __init__(self, _ord, N, allowed=[]):
         self.ord = _ord
+        self._size = N
         self.N = N
         self.ctype = "uint8_t[{}]".format(self.N)
     def parse(self, msg):
