@@ -38,6 +38,38 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(ver.extension_3, "GPS;GLO;GAL;BDS")
         self.assertEqual(ver.extension_4, "SBAS;IMES;QZSS")
 
+    def testNAV_SAT(self):
+        payload = b'\xB0\x1B\x48\x14\x01\x03\x00\x00\x00\x01\x21\x01\x8A\x00\x18\xFD\x17\x09\x00\x00\x00\x00\x00\x04\x18\xA5\x00\x00\x00\x00\x04\x00\x00\x00\x00\x08\x16\xA5\x00\x00\x00\x00\x03\x00'
+        sat = parseUBXPayload(UBX.NAV._class, UBX.NAV.SAT._id, payload)
+        self.assertEqual(sat.iTOW, 0x14481BB0)
+        self.assertEqual(sat.version, 0x01)
+        self.assertEqual(sat.numSvs, 0x03)
+        self.assertEqual(sat.reserved0, 0x0000)
+
+        self.assertEqual(sat.gnssId_1, 0)
+        self.assertEqual(sat.svId_1, 1)
+        self.assertEqual(sat.cno_1, 33)
+        self.assertEqual(sat.elev_1, 1)
+        self.assertEqual(sat.azim_1, 138)
+        self.assertEqual(sat.prRes_1, -744)
+        self.assertEqual(sat.flags_1, 0x00000917)
+
+        self.assertEqual(sat.gnssId_2, 0)
+        self.assertEqual(sat.svId_2, 0)
+        self.assertEqual(sat.cno_2, 0)
+        self.assertEqual(sat.elev_2, 4)
+        self.assertEqual(sat.azim_2, -23272)
+        self.assertEqual(sat.prRes_2, 0)
+        self.assertEqual(sat.flags_2, 0x00040000)
+
+        self.assertEqual(sat.gnssId_3, 0)
+        self.assertEqual(sat.svId_3, 0)
+        self.assertEqual(sat.cno_3, 0)
+        self.assertEqual(sat.elev_3, 8)
+        self.assertEqual(sat.azim_3, -23274)
+        self.assertEqual(sat.prRes_3, 0)
+        self.assertEqual(sat.flags_3, 0x00030000)
+
     def testCFG_GNSS(self):
         payload = b'\x00\x20\x20\x07\x00\x08\x10\x00\x01\x00\x01\x01\x01\x01\x03\x00\x01\x00\x01\x01\x02\x04\x08\x00\x00\x00\x01\x01\x03\x08\x10\x00\x00\x00\x01\x01\x04\x00\x08\x00\x00\x00\x01\x03\x05\x00\x03\x00\x01\x00\x01\x05\x06\x08\x0e\x00\x01\x00\x01\x01'
         gnss = parseUBXPayload(UBX.CFG._class, UBX.CFG.GNSS._id, payload)
